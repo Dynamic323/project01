@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [name, setName] = useState("");
+  const [email, setemail] = useState("");
+  const [phone, setphone] = useState("");
+  // const sendToWhatsApp = (event) => {
 
+  // };
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Dynamic react Project </h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+
+          if (name == "" || email == "") {
+            alert("error can not be empty");
+          }
+
+          const msg = `
+    Hello my name is ${name}
+    `;
+
+          console.log(name, email, phone);
+        }}
+      >
+        <fieldset>
+          <input
+            type="text"
+            id="name"
+            onChange={(e) => setName(e.target.value)}
+            value={name}
+            placeholder="Your name"
+            required
+          />
+          <br />
+          <input
+            type="email"
+            id="email"
+            onChange={(e) => setemail(e.target.value)}
+            value={email}
+            placeholder="Your email"
+            required
+          />
+          <br />
+          <input
+            type="number"
+            onChange={(e) => setphone(e.target.value)}
+            value={phone}
+            placeholder="+234"
+          />
+          <button type="submit">Send via WhatsApp</button>
+        </fieldset>
+      </form>
+    </div>
+  );
 }
 
-export default App
+export default App;
