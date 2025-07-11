@@ -3,10 +3,15 @@ import App from "./App";
 import Login from "./Guest/Pages/Form/Login";
 import Layout from "./Guest/Layout";
 import { Form } from "./Guest/Pages/Form/Index";
+import { AuthProvider } from "./context/Authcontext";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <AuthProvider>
+        <Layout />
+      </AuthProvider>
+    ),
     children: [
       {
         path: "",

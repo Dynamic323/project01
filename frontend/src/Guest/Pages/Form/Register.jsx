@@ -1,24 +1,19 @@
 import React, { useState } from "react";
 import Navbar from "../../../Components/Navbar";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuth } from "../../../context/Authcontext";
 
 function Register() {
+  // const { register } = useAuth();
+
   const [formFildes, setFormfields] = useState({
     name: "",
     email: "",
     password: "",
   });
 
-  //   const handelChange = (e)=>
-  //   {
-  //     const {name , value} = e.target
-  //     setFormfields((prev)=>({
-  //         ...prev,
-  //         {
-  //             [name]:value
-  //         }
-  //     }))
-  //   }
+  const [loading, setloading] = useState(false);
 
   function handelChange(e) {
     const { name, value } = e.target;
@@ -29,15 +24,46 @@ function Register() {
     }));
   }
 
-  const HandelSubmit = (e) => {
+  const HandelSubmit = async (e) => {
     e.preventDefault();
+    const { name, email, password } = formFildes;
+    if (!name || !email || !password) {
+      toast.error("Please fill in all fields");
+      console.log("error");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast("Please enter a valid email address", "error");
+      return;
+    }
+
+    if (password.length < 8) {
+      toast("Password must be at least 8 characters long", "error");
+      return;
+    }
+
+    // try {
+    //   setloading(true);
+
+    //   // const user = await register(email, password);
+
+    //   toast.success("Account created successfully! Welcome to Replico");
+
+    //   setTimeout(() => {
+    //     Navigate("/");
+    //     console.log("Redirecting to dashboard...");
+    //   }, 1000);
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   return (
     <>
-      <div className="mt-auto " onSubmit={HandelSubmit}>
+      <div className="mt-auto ">
         <div className=" max-w-md mx-auto ">
-          <form action=" " onSubmit={HandelSubmit}>
+          <form action="" onSubmit={HandelSubmit}>
             <div className=" text-3xl "> create an Account </div>
 
             <div className="flex flex-col my-5 gap-7">
@@ -62,24 +88,56 @@ function Register() {
                 className="border border-slate-400 p-3 rounded-s-2xl"
                 type="password"
                 placeholder="Password"
-                name="Password"
+                name="password"
                 value={formFildes.password}
                 onChange={handelChange}
               />
             </div>
 
-            <span> or sign in with </span>
+            <span> or sign in with Google or GitHub</span>
 
-            <div className="">
-              <button>
-                <i class="fa-brands fa-google"> </i>
+            <div className="flex gap-4 items-center my-3 ">
+              <button className=" w-[30%] py-1 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-3xl flex justify-center items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="25"
+                  height="25"
+                  viewBox="0 0 48 48"
+                >
+                  <path
+                    fill="#fbc02d"
+                    d="M43.6 20.5H42V20H24v8h11.3C33.2 32.4 29 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.4 1.1 7.4 2.9l5.7-5.7C33.7 7.1 29.1 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19c9.8 0 18-7.1 18-19 0-1.3-.1-2.4-.4-3.5z"
+                  />
+                  <path
+                    fill="#e53935"
+                    d="M6.3 14.7l6.6 4.8C14.5 15.2 18.9 12 24 12c2.8 0 5.4 1.1 7.4 2.9l5.7-5.7C33.7 7.1 29.1 5 24 5c-7.2 0-13.4 3.6-17.1 9.2l-.6.5z"
+                  />
+                  <path
+                    fill="#4caf50"
+                    d="M24 43c5.2 0 9.9-2 13.4-5.2l-6.2-5.1C29.4 34.4 26.8 35 24 35c-5.1 0-9.4-2.6-11.6-6.5l-6.5 5c3.7 5.7 10 9.5 17.1 9.5z"
+                  />
+                  <path
+                    fill="#1565c0"
+                    d="M43.6 20.5H42V20H24v8h11.3C34.5 31.7 29.7 35 24 35c-5.1 0-9.4-2.6-11.6-6.5l-6.5 5C9.5 38.3 16.2 43 24 43c9.8 0 18-7.1 18-19 0-1.3-.1-2.4-.4-3.5z"
+                  />
+                </svg>
               </button>
-              <button></button>
+              <button className=" w-[30%] py-1 cursor-pointer bg-slate-400 hover:bg-slate-200 rounded-3xl flex justify-center items-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="25"
+                  height="25"
+                  viewBox="0 0 24 24"
+                  fill="black"
+                >
+                  <path d="M12 0C5.37 0 0 5.373 0 12a12 12 0 0 0 8.207 11.385c.6.11.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.334-1.756-1.334-1.756-1.09-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.806 1.305 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.467-1.335-5.467-5.935 0-1.31.468-2.38 1.236-3.22-.124-.303-.536-1.522.117-3.176 0 0 1.008-.322 3.3 1.23A11.52 11.52 0 0 1 12 6.844c1.02.005 2.045.138 3.003.405 2.29-1.552 3.297-1.23 3.297-1.23.654 1.654.242 2.873.118 3.176.77.84 1.235 1.91 1.235 3.22 0 4.61-2.807 5.632-5.48 5.927.43.372.814 1.103.814 2.222 0 1.606-.014 2.903-.014 3.296 0 .32.216.694.825.576A12.005 12.005 0 0 0 24 12c0-6.627-5.373-12-12-12z" />
+                </svg>
+              </button>
             </div>
 
             <button
               type="submit"
-              className="w-full mb-3  py-3 rounded-2xl bg-orange-600"
+              className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-orange-600"
             >
               Create
             </button>

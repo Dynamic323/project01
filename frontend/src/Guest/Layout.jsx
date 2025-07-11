@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import Loader from "../Components/Loader";
-
+import { ToastContainer } from "react-toastify";
 function Layout() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -19,6 +19,7 @@ function Layout() {
 
   return (
     <>
+      <ToastContainer />
       {loading && <Loader />}
 
       {!loading && (
