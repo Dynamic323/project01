@@ -2,20 +2,33 @@ import React from "react";
 
 function Hero() {
   return (
-    <div className=" p-4 h-[500px]   flex flex-col items-center justify-center  gap-4 font-mono text-shadow-2xs border">
-      <h1 className="text-3xl text-slate-300">
-        Welcome to <span className="text-orange-500">Share-X</span> Share files
-        , text and code snippet seemlessly to your friends
+    <div className="container mx-auto max-w-4xl text-center">
+      <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+        Paste code. Share files.{" "}
+        <span className="text-orange-500">Instantly.</span>
       </h1>
 
-      <div className=" text-2xl flex gap-3.5">
-        <button className="inline-flex  min-w-0 border border-orange-500 px-6 py-3 rounded-2xl  text-orange-500 font-semibold shadow hover:bg-orange-50 transition cursor-pointer">
-          Upload
+      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <button
+          size="lg"
+          className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold"
+          onClick={() => setActiveTab("paste")}
+        >
+          {/* <Code className="mr-2 h-5 w-5" /> */}
+          Paste Code
         </button>
-        <button className="bg-orange-500 px-6 py-3 rounded-2xl  text-white font-semibold shadow hover:bg-orange-600 transition cursor-pointer">
-          Share
+        <button
+          size="lg"
+          className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold"
+          onClick={() => setActiveTab("upload")}
+        >
+          {/* <Upload className="mr-2 h-5 w-5" /> */}
+          Upload File
         </button>
       </div>
+      <p className="text-xl md:text-2xl text-slate-300 mb-12 max-w-2xl mx-auto">
+        Get a link you can share with anyone.
+      </p>
     </div>
   );
 }

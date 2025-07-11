@@ -4,6 +4,7 @@ import Login from "./Guest/Pages/Form/Login";
 import Layout from "./Guest/Layout";
 import { Form } from "./Guest/Pages/Form/Index";
 import { AuthProvider } from "./context/Authcontext";
+import { User } from "./User";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
       {
         path: "login",
         element: <Form.Login />,
+      },
+      {
+        path: "dashboard",
+        element: <User />,
       },
     ],
   },
