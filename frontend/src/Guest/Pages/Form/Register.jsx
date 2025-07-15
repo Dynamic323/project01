@@ -55,7 +55,10 @@ function Register() {
       navigate("/dashboard");
     } catch (error) {
       setloading(false);
-      toast.error(`${error} Registration failed. Try again.`);
+      toast.error(`${error}`);
+// const err = ""
+// err.j
+      // const json err =  error.
       console.error(error);
     }
   };
@@ -64,6 +67,8 @@ function Register() {
     try {
       await googleSignin();
       toast.success("Logged in with Google!");
+      navigate("/dashboard");
+
     } catch (err) {
       toast.error("Google login failed");
     }
@@ -73,6 +78,8 @@ function Register() {
     try {
       await githubSignIn();
       toast.success("Logged in with GitHub!");
+      navigate("/dashboard");
+      
     } catch (err) {
       toast.error("GitHub login failed");
     }
@@ -80,8 +87,8 @@ function Register() {
 
   return (
     <div className="mt-auto">
-      <div className="max-w-md mx-auto">
-        <form onSubmit={HandelSubmit}>
+      <div className="max-w-md mx-auto border border-slate-700 p-5 rounded ">
+        <form onSubmit={HandelSubmit} className="">
           <div className="text-3xl mb-6">Create an Account</div>
 
           <div className="flex flex-col gap-6 mb-6">
@@ -111,13 +118,13 @@ function Register() {
             />
           </div>
 
-          <span>Or sign in with Google or GitHub</span>
+          <span>Or Continue with Google/GitHub to sign up</span>
 
           <div className="flex gap-4 items-center my-4">
             <button
               type="button"
               onClick={handleGoogle}
-              className="w-[30%] py-2 bg-slate-700 hover:bg-slate-600 rounded-3xl flex justify-center items-center"
+              className="w-[50%] py-2.5 cursor-pointer  bg-slate-700 hover:bg-slate-600 rounded-3xl flex justify-center items-center"
             >
               {/* Google SVG */}
               <svg
@@ -149,7 +156,7 @@ function Register() {
             <button
               type="button"
               onClick={handleGithub}
-              className="w-[30%] py-2 bg-slate-400 hover:bg-slate-300 rounded-3xl flex justify-center items-center"
+              className="w-[50%] py-2.5 cursor-pointer bg-slate-400 hover:bg-slate-300 rounded-2xl flex justify-center items-center"
             >
               {/* GitHub SVG */}
               <svg

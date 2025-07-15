@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 function Navbar() {
   return (
     <div>
-      <nav className="flex items-center">
+      <nav className="flex border-b border-slate-400 items-center">
         <ul className=" w-full flex items-center justify-between px-8">
           <li className="font-mono text-4xl py-2.5">
-            <Link to="/"> ShareX</Link>
+            <Link to="/"> Dy-ShareX</Link>
           </li>
           {/* <li>About</li> */}
 

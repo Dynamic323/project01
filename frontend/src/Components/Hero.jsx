@@ -2,7 +2,7 @@ import React from "react";
 
 function Hero() {
   return (
-    <div className="container mx-auto max-w-4xl text-center">
+    <div className="container mx-auto max-w-4xl text-center font-sans ">
       <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
         Paste code. Share files.{" "}
         <span className="text-orange-500">Instantly.</span>

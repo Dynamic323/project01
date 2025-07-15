@@ -6,8 +6,6 @@ import { ToastContainer } from "react-toastify";
 function Layout() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  console.log(location);
-  console.log("loading" + loading);
 
   useEffect(() => {
     setLoading(true);
