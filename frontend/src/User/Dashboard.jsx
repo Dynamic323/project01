@@ -11,8 +11,7 @@ function Dashboard() {
     try {
       await logout();
       toast.success("Log out succesful");
-
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       toast.error(error.message);
     }

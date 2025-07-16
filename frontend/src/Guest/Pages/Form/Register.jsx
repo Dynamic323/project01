@@ -42,7 +42,7 @@ function Register() {
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 8 characters long");
+      toast.error("Password must be at least 6 characters long");
       return;
     }
 
@@ -56,9 +56,6 @@ function Register() {
     } catch (error) {
       setloading(false);
       toast.error(`${error}`);
-// const err = ""
-// err.j
-      // const json err =  error.
       console.error(error);
     }
   };

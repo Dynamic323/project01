@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "../../../Components/Navbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Authcontext";
+import { toast } from "react-toastify";
+import Spinner from "../../../Components/Spinner";
 
 function Login() {
-  const { googleSignin, githubSignIn } = useAuth();
+  const { login, googleSignin, githubSignIn } = useAuth();
+  const [loading, setloading] = useState(false);
+  const navigate = useNavigate();
+  const [formFildes, setFormfields] = useState({
+    password: "",
+    email: "",
+  });
   const handleGoogle = async () => {
     try {
       await googleSignin();
@@ -24,23 +32,72 @@ function Login() {
     }
   };
 
+  const Handelchange = (e) => {
+    const { name, value } = e.target;
+
+    setFormfields((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const HandelSubmit = async (e) => {
+    e.preventDefault();
+
+    const { email, password } = formFildes;
+
+    if (!email || !password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    try {
+      setloading(true);
+      await login(email, password);
+      setloading(false);
+      toast.success("Account created successfully! Welcome to Replico");
+      navigate("/dashboard");
+    } catch (error) {
+      setloading(false);
+      toast.error(`${error}`);
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <div className="mt-auto ">
         <div className=" max-w-md mx-auto border border-slate-700 p-5 rounded ">
-          <form action=" ">
+          <form action="" onSubmit={HandelSubmit}>
             <div className=" text-3xl "> Log in to your Account! </div>
 
             <div className="flex flex-col my-5 gap-7">
               <input
                 className="border border-slate-400 p-3 rounded-s-2xl"
+                onChange={Handelchange}
                 type="email"
                 placeholder="Email"
+                value={formFildes.email}
+                name="email"
               />
               <input
                 className="border border-slate-400 p-3 rounded-s-2xl"
+                onChange={Handelchange}
                 type="password"
                 placeholder="Password"
+                value={formFildes.password}
+                name="password"
               />
             </div>
             <span>Or Continue with Google/GitHub to sign up</span>
@@ -98,10 +155,9 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full mb-3  py-3 rounded-2xl bg-orange-600"
+              className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-orange-600 text-white flex justify-center items-center"
             >
-              {" "}
-              Create
+              {loading ? <Spinner /> : "Login"}
             </button>
             <span className="text-slate-400  ">
               Don't have an Account ?{" "}
