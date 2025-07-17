@@ -5,7 +5,7 @@ function Hero() {
     <div className="container mx-auto max-w-4xl text-center font-sans ">
       <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
         Paste code. Share files.{" "}
-        <span className="text-orange-500">Instantly.</span>
+        <span className="text-red-400">Instantly.</span>
       </h1>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

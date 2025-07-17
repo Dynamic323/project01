@@ -18,6 +18,7 @@ function Login() {
       await googleSignin();
 
       toast.success("Logged in with Google!");
+      navigate("/dashboard");
     } catch (err) {
       toast.error("Google login failed");
     }
@@ -27,6 +28,7 @@ function Login() {
     try {
       await githubSignIn();
       toast.success("Logged in with GitHub!");
+      navigate("/dashboard");
     } catch (err) {
       toast.error("GitHub login failed");
     }

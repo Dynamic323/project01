@@ -65,7 +65,6 @@ function Register() {
       await googleSignin();
       toast.success("Logged in with Google!");
       navigate("/dashboard");
-
     } catch (err) {
       toast.error("Google login failed");
     }
@@ -76,7 +75,6 @@ function Register() {
       await githubSignIn();
       toast.success("Logged in with GitHub!");
       navigate("/dashboard");
-      
     } catch (err) {
       toast.error("GitHub login failed");
     }
@@ -170,7 +168,7 @@ function Register() {
 
           <button
             type="submit"
-            className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-orange-600 text-white flex justify-center items-center"
+            className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-red-400 text-gray-900 flex justify-center items-center"
             disabled={loading}
           >
             {loading ? <Spinner /> : "Create"}
@@ -179,7 +177,7 @@ function Register() {
           <span className="text-slate-400">
             Already have an Account?{" "}
             <Link to="/login">
-              <span className="text-orange-500 underline">Login now</span>
+              <span className="text-red-400 underline">Login now</span>
             </Link>
           </span>
         </form>
