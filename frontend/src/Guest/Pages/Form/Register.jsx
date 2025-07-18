@@ -81,7 +81,7 @@ function Register() {
   };
 
   return (
-    <div className="mt-auto">
+    <div className="mt-auto pt-[7%]">
       <div className="max-w-md mx-auto border border-slate-700 p-5 rounded ">
         <form onSubmit={HandelSubmit} className="">
           <div className="text-3xl mb-6">Create an Account</div>
@@ -168,7 +168,7 @@ function Register() {
 
           <button
             type="submit"
-            className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-red-400 text-gray-900 flex justify-center items-center"
+            className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-gradient-to-r from-red-400 to-red-500 text-gray-900 flex justify-center items-center"
             disabled={loading}
           >
             {loading ? <Spinner /> : "Create"}

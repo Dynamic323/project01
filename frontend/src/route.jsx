@@ -7,14 +7,15 @@ import Login from "./Guest/Pages/Form/Login";
 import User_Layout from "./User/User_Layout";
 import ProtectedRoute from "./Middleware/ProtectedRoute";
 import Dashboard from "./User/Dashboard";
-
+import { HistoryPage } from "./User/HistoryPage";
+import { SettingsPage } from "./User/SettingsPage";
+import { FilesPage } from "./User/Pages/files-page";
+import { StoragePage } from "./User/Pages/storage-page";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-        <Layout />
-    ),
+    element: <Layout />,
     children: [
       {
         index: true,
@@ -39,9 +40,25 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path:"",
+        path: "",
         index: true,
         element: <Dashboard />,
+      },
+      {
+        path: "files",
+        element: <FilesPage />,
+      },
+      {
+        path: "history",
+        element: <HistoryPage />,
+      },
+      {
+        path:"storage",
+        element:<StoragePage/>
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />,
       },
     ],
   },

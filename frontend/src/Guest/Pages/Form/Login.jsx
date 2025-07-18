@@ -79,7 +79,7 @@ function Login() {
 
   return (
     <>
-      <div className="mt-auto ">
+      <div className="mt-auto pt-[7%] ">
         <div className=" max-w-md mx-auto border border-slate-700 p-5 rounded ">
           <form action="" onSubmit={HandelSubmit}>
             <div className=" text-3xl "> Log in to your Account! </div>
@@ -157,7 +157,7 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-orange-600 text-white flex justify-center items-center"
+              className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-gradient-to-tr from-red-400 to-red-500 text-gray-900 text-white flex justify-center items-center"
             >
               {loading ? <Spinner /> : "Login"}
             </button>
@@ -165,9 +165,7 @@ function Login() {
               Don't have an Account ?{" "}
               <Link to="/register">
                 <span>
-                  <i className="text-orange-500 underline">
-                    Create new account
-                  </i>
+                  <i className="text-red-400 underline">Create new account</i>
                 </span>
               </Link>
             </span>

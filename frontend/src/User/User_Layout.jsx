@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import Loader from "../Components/Loader";
 import { ToastContainer } from "react-toastify";
 import {
@@ -12,6 +12,15 @@ import {
   GitBranch,
   Database,
 } from "lucide-react";
+import {
+  AiOutlineDashboard,
+  AiOutlineDatabase,
+  AiOutlineFile,
+  AiOutlineFolder,
+  AiOutlineHistory,
+  AiOutlineHome,
+  AiOutlineSetting,
+} from "react-icons/ai";
 
 function User_Layout() {
   const [loading, setLoading] = useState(true);
@@ -27,14 +36,38 @@ function User_Layout() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const sidebarItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: History, label: "History", path: "/history" },
-    { icon: Settings, label: "Settings", path: "/settings" },
-    { icon: Terminal, label: "Snippets", path: "/snippets" },
-    { icon: GitBranch, label: "Projects", path: "/projects" },
-    { icon: Database, label: "Storage", path: "/storage" },
-  ];
+const sidebarItems = [
+  {
+    title: "Dashboard",
+    path: "/dashboard",
+    icon: AiOutlineHome,
+    label: "dashboard",
+  },
+  {
+    title: "My Files",
+    path: "/dashboard/files",
+    icon: AiOutlineFile,
+    label: "files",
+  },
+  {
+    title: "History",
+    path: "/dashboard/history",
+    icon: AiOutlineHistory,
+    label: "history",
+  },
+  {
+    title: "Storage",
+    path: "/dashboard/storage",
+    icon: AiOutlineDatabase,
+    label: "storage",
+  },
+  {
+    title: "Settings",
+    path: "/dashboard/settings",
+    icon: AiOutlineSetting,
+    label: "settings",
+  },
+];
 
   return (
     <>
@@ -42,11 +75,11 @@ function User_Layout() {
       {loading && <Loader />}
 
       {!loading && (
-        <div className="h-[100vh]  font-mono	bg-slate-900  text-white">
-          <div className="flex h-screen bg-slate-900">
+        <div className="h-fit  font-mono	bg-slate-900  text-white">
+          <div className="flex  bg-slate-900">
             {/* Sidebar */}
             <div
-              className={`${
+              className={` h-screen  ${
                 sidebarCollapsed ? "w-20" : "w-64"
               } bg-slate-800 border-r border-slate-700 transition-all duration-300 ease-in-out flex flex-col`}
             >
@@ -74,8 +107,8 @@ function User_Layout() {
                 <ul className="space-y-2">
                   {sidebarItems.map((item, index) => (
                     <li key={index}>
-                      <a
-                        href={item.path}
+                      <Link
+                        to={`${item.path}`}
                         className={`flex items-center ${
                           sidebarCollapsed
                             ? "justify-center p-4"
@@ -92,14 +125,15 @@ function User_Layout() {
                             {item.label}
                           </span>
                         )}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </nav>
-
             </div>
-                <Outlet />
+            <div className="w-full">
+            <Outlet />
+            </div>
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/Authcontext";
 import { toast } from "react-toastify";
+import { Dropzone } from "../Components/Dropzone";
 import { useNavigate } from "react-router-dom";
 import { Upload, User, Code, File, Terminal } from "lucide-react";
 function Dashboard() {
@@ -46,8 +47,20 @@ function Dashboard() {
     }
   };
 
+  //   const getPageTitle = () => {
+  //   const titles = {
+  //     dashboard: "Dashboard",
+  //     history: "History",
+  //     settings: "Settings",
+  //     files: "My Files",
+  //     folders: "Folders",
+  //     storage: "Storage",
+  //   };
+  //   return titles[activeTab] || "Dashboard";
+  // };
+
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1  flex flex-col">
       {/* Main Content */}
       {/* Header */}
       <header className="bg-slate-800 border-b border-slate-700 px-6 py-4">
@@ -72,40 +85,28 @@ function Dashboard() {
       <main className="flex-1 p-6 bg-slate-900">
         <div className="max-w-4xl mx-auto">
           {/* Upload Mode Toggle */}
-          <div className="mb-6">
-            <div className="flex items-center space-x-4 mb-4">
-              <span className="text-sm font-medium text-slate-300 font-mono">
-                Upload Mode:
-              </span>
-              <div className="flex border border-slate-600 rounded-md overflow-hidden">
-                <button
-                  onClick={() => setuploadMode("files")}
-                  className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 transition-colors font-mono ${
-                    uploadMode === "files"
-                      ? "bg-red-400 text-slate-900"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  }`}
-                >
-                  <File className="w-4 h-4" />
-                  <span>Files</span>
-                </button>
-                <button
-                  onClick={() => setuploadMode("text")}
-                  className={`px-4 py-2 text-sm font-medium flex items-center space-x-2 transition-colors border-l border-slate-600 font-mono ${
-                    uploadMode === "text"
-                      ? "bg-red-400 text-slate-900"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  }`}
-                >
-                  <Code className="w-4 h-4" />
-                  <span>Text</span>
-                </button>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-slate-400">Welcome back!</div>
+            <div className="px-3 py-1 bg-slate-800 border border-slate-700 rounded-full">
+              {/* <span className="text-red-400 text-sm">{getPageTitle()}</span> */}
             </div>
           </div>
 
+          {/* <div className="mb-12 text-center">
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Welcome to DyshareX
+            </h2>
+            <p className="text-slate-400 text-lg">
+              Share your files with the world
+            </p>
+            <div className="mt-4 flex justify-center">
+              <div className="px-4 py-2 bg-slate-800 rounded-full border border-slate-700">
+                <span className="text-red-400 text-sm">Ready to share</span>
+              </div>
+            </div>
+          </div> */}
           {/* Upload Area */}
-          {uploadMode === "files" ? (
+          {/* {uploadMode === "files" ? (
             <div
               className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 dragActive
@@ -163,7 +164,9 @@ function helloWorld() {
                 </button>
               </div>
             </div>
-          )}
+          )} */}
+
+          <Dropzone />
 
           {/* Recent Files */}
           <div className="mt-8">

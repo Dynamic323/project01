@@ -24,7 +24,7 @@ function Layout() {
         <div className="h-[100vh]  font-mono	bg-slate-900 text-white">
           <Navbar />
 
-          <div className="pt-20">
+          <div className="">
             <Outlet />
           </div>
         </div>

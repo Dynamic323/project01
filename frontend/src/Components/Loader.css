@@ -2,7 +2,7 @@
 .custom-loader {
   width: 70px;
   height: 70px;
-  background: #ff6900;
+  background: oklch(70.4% 0.191 22.216);
   border-radius: 50px;
   -webkit-mask: radial-gradient(
         circle 31px at 50% calc(100% + 13px),
