@@ -10,14 +10,14 @@ function Navbar() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-400 to-red-500 text-white font-bold text-lg shadow-lg">
               <AiOutlineCloudUpload className="h-5 w-5" />
             </div>
-            <div className="flex flex-col">
+            <Link to="/" className="flex flex-col">
               <span className="font-bold text-xl text-white tracking-tight">
                 DyshareX
               </span>
               <span className="text-xs text-slate-400">
                 File Sharing Made Simple
               </span>
-            </div>
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center gap-8">

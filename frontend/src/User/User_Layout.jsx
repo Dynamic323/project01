@@ -31,43 +31,45 @@ function User_Layout() {
 
     setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 600);
   }, [location]);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-const sidebarItems = [
-  {
-    title: "Dashboard",
-    path: "/dashboard",
-    icon: AiOutlineHome,
-    label: "dashboard",
-  },
-  {
-    title: "My Files",
-    path: "/dashboard/files",
-    icon: AiOutlineFile,
-    label: "files",
-  },
-  {
-    title: "History",
-    path: "/dashboard/history",
-    icon: AiOutlineHistory,
-    label: "history",
-  },
-  {
-    title: "Storage",
-    path: "/dashboard/storage",
-    icon: AiOutlineDatabase,
-    label: "storage",
-  },
-  {
-    title: "Settings",
-    path: "/dashboard/settings",
-    icon: AiOutlineSetting,
-    label: "settings",
-  },
-];
+  console.log(sidebarCollapsed);
+
+  const sidebarItems = [
+    {
+      title: "Dashboard",
+      path: "/dashboard",
+      icon: AiOutlineHome,
+      label: "dashboard",
+    },
+    {
+      title: "My Files",
+      path: "/dashboard/files",
+      icon: AiOutlineFile,
+      label: "files",
+    },
+    {
+      title: "History",
+      path: "/dashboard/history",
+      icon: AiOutlineHistory,
+      label: "history",
+    },
+    {
+      title: "Storage",
+      path: "/dashboard/storage",
+      icon: AiOutlineDatabase,
+      label: "storage",
+    },
+    {
+      title: "Settings",
+      path: "/dashboard/settings",
+      icon: AiOutlineSetting,
+      label: "settings",
+    },
+  ];
 
   return (
     <>
@@ -104,20 +106,20 @@ const sidebarItems = [
 
               {/* Sidebar Navigation */}
               <nav className="flex-1 p-4">
-                <ul className="space-y-2">
+                <ul className="space-y-7 ">
                   {sidebarItems.map((item, index) => (
-                    <li key={index}>
+                    <li key={index} className="">
                       <Link
                         to={`${item.path}`}
                         className={`flex items-center ${
                           sidebarCollapsed
-                            ? "justify-center p-4"
+                            ? "justify-center p-3"
                             : "justify-start p-3"
                         } rounded-md hover:bg-slate-700 transition-colors group`}
                       >
                         <item.icon
                           className={`${
-                            sidebarCollapsed ? "w-6 h-6" : "w-5 h-5"
+                            sidebarCollapsed ? "w-8 h-8" : "w-5 h-5"
                           } text-slate-300 group-hover:text-red-400 transition-colors`}
                         />
                         {!sidebarCollapsed && (
@@ -132,7 +134,7 @@ const sidebarItems = [
               </nav>
             </div>
             <div className="w-full">
-            <Outlet />
+              <Outlet />
             </div>
           </div>
         </div>
