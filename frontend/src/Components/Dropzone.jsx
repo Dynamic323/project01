@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import {
   AiOutlineCloudUpload,
   AiOutlineFile,
@@ -9,13 +10,24 @@ import {
   AiOutlineDelete,
   AiOutlineLink,
 } from "react-icons/ai";
+import Modal from "./Modal";
+import Loader from "./Loader";
+import Spinner from "./Spinner";
+import { useEffect } from "react";
 
 export function Dropzone() {
   const [uploadType, setUploadType] = React.useState("files");
   const [isDragOver, setIsDragOver] = React.useState(false);
   const [files, setFiles] = React.useState([]);
   const [textContent, setTextContent] = React.useState("");
+  const [Showmodal, setShowmodal] = React.useState(false);
+  const [expiresAt, setExpiresAt] = useState("");
+  const [dayName, setDayName] = React.useState("");
+  const [type, setType] = React.useState("");
+  const [isPublic, setIsPublic] = React.useState(true);
+  const [sl, setsl] = React.useState(false);
 
+  // const [isDateEditable, setIsDateEditable] = React.useState(false);
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -53,6 +65,149 @@ export function Dropzone() {
       return <AiOutlineVideoCamera className="h-4 w-4 text-red-400" />;
     return <AiOutlineFile className="h-4 w-4 text-red-400" />;
   };
+
+  const Haldelgenerate = () => {
+    setShowmodal(true);
+  };
+
+  const generateShareLink = async () => {
+    setsl(true);
+    // const DataObj = {
+    //   textInput: textContent,
+    //   selectedFiles: files,
+    // };
+    // const res = await api.HandelUpload(DataObj);
+  };
+
+  const HandelSubmit = (e) => {
+    e.preventDefault();
+
+    if (!textContent && files.length === 0) {
+      alert("Please enter some text or select files to upload.");
+      return;
+    }
+  };
+
+  useEffect(() => {
+    const now = new Date();
+    const expiresDate = new Date(now.setDate(now.getDate() + 2)); // 2 days from now
+    setExpiresAt(expiresDate.toISOString()); // Full ISO date for backend use
+
+    const dayOfWeek = expiresDate.toLocaleDateString("en-US", {
+      weekday: "long",
+    }); // e.g., "Thursday"
+    setDayName(dayOfWeek);
+  }, []);
+  if (Showmodal) {
+    return (
+      <>
+        <div className=" ">
+          <div className="shadow-xl h-[400px] flex justify-center items-center">
+            <form action="" onSubmit={HandelSubmit}>
+              <div className=" gap-5 flex items-start flex-col  justify-center">
+                <div className="">
+                  <label htmlFor="title" className=" text-slate-100  text-xl">
+                    <span className="mr-2"> Save as (Title) : </span>
+                  </label>
+                  <input
+                    className="text-2xl p-1 outline-0 border-b border-2 border-slate-600 rounded"
+                    type="text"
+                    name=""
+                    id="title"
+                  />
+                </div>
+
+                {/* Expires At */}
+                <div className=" flex items-center space-x-4">
+                  <p className="text-white">
+                    Will expire:{" "}
+                    <span className="font-bold text-red-400">
+                      "{dayName}" (in 2 days time)
+                    </span>
+                  </p>
+                  <button
+                    className="text-sm text-red-400 border border-red-400 px-2 py-1 rounded hover:bg-red-400 hover:text-white transition"
+                    onClick={() => alert("Change feature coming soon!")}
+                  >
+                    Change
+                  </button>
+                </div>
+
+                <div className="flex items-center  mb-2 gap-3">
+                  <label className="text-sm">Visibility:</label>
+                  <button
+                    className={`px-3 py-1 rounded ${
+                      isPublic ? "bg-red-400" : "bg-slate-600"
+                    }`}
+                    onClick={() => setIsPublic(true)}
+                  >
+                    Public
+                  </button>
+                  <button
+                    className={`px-4 py-1 rounded ${
+                      !isPublic ? "bg-red-400" : "bg-slate-600"
+                    }`}
+                    onClick={() => setIsPublic(false)}
+                  >
+                    Private
+                  </button>
+                </div>
+
+                {/* Type */}
+                <div className="flex items-center gap-3">
+                  <label className="block mb-1">Type:</label>
+                  <select
+                    className="w-full bg-slate-800 p-2 rounded"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                  >
+                    <option value="text">Text</option>
+                    <option value="code">Code</option>
+                  </select>
+                </div>
+
+                <div className=" flex items-center gap-3">
+                  <button
+                    onClick={generateShareLink}
+                    className="group cursor-pointer flex items-center gap-3 px-4 py-2 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all duration-300 font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40"
+                  >
+                    {sl ? (
+                      <>
+                        {/* Loading <Spinner /> */}
+                        {/* <Loader text={"Generating Link"} /> */}
+                        <Spinner /> Generating Link.....
+                      </>
+                    ) : (
+                      <>
+                        <AiOutlineLink className="h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
+                        Generate Share Link
+                      </>
+                    )}
+                  </button>
+
+                  {sl && (
+                    <div className="">
+                      <button
+                        className="hover:text-red-400 cursor-pointer border border-2 border-red-400 transition-all duration-300 font-bold text-lg shadow-lg  shadow-red-400/40 bg-transparent text-slate-300 px-3 py-1 rounded-2xl"
+                        onClick={() => {
+                          setsl(false);
+                        }}
+                      >
+                        {" "}
+                        Cancel{" "}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        {/* <Loader /> */}
+        {/* </Modal> */}
+      </>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6">
@@ -184,7 +339,7 @@ export function Dropzone() {
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               placeholder="Type or paste your text here...
-
+              
 You can share:
 • Notes and reminders
 • Code snippets
@@ -201,9 +356,12 @@ You can share:
 
       {/* Share Button */}
       <div className="mt-8 flex justify-center">
-        <button className="group flex items-center gap-3 px-8 py-4 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all duration-300 font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40">
+        <button
+          onClick={Haldelgenerate}
+          className="group cursor-pointer flex items-center gap-3 px-8 py-4 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all duration-300 font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40"
+        >
           <AiOutlineLink className="h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
-          Generate Share Link
+          Proceed
         </button>
       </div>
     </div>

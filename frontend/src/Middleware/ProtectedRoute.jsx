@@ -9,7 +9,6 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
   console.log(user);
-  
 
   return <>{children}</>;
 }

@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../../../context/Authcontext";
+
 import Spinner from "../../../Components/Spinner";
-import Navbar from "../../../Components/Navbar"; // if needed
-import Loader from "../../../Components/Loader";
 
 function Register() {
   const { register, googleSignin, githubSignIn } = useAuth();
@@ -175,7 +174,7 @@ function Register() {
           </button>
 
           <span className="text-slate-400">
-            Already have an Account?{" "}
+            Already have an Account?
             <Link to="/login">
               <span className="text-red-400 underline">Login now</span>
             </Link>

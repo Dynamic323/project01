@@ -4,6 +4,9 @@ const pool = require("../config/db");
 const cloudinary = require("../config/cloudinary");
 
 const uploadContent = async (req, res) => {
+  const request = req.body;
+  const file = req.file;
+
   try {
     const {
       text,
@@ -13,9 +16,17 @@ const uploadContent = async (req, res) => {
       type: inputType,
       userId,
     } = req.body;
+
+    if (!text && !req.file) {
+      return res.status(400).json({ error: "Either text or file is required" });
+    }
+
     const file = req.file;
 
-    const id = uuidv4();
+    const id = uuidv4().slice(0, 8); // Shorten UUID for easier URLs
+    if (!id) {
+      return res.status(500).json({ error: "Failed to generate unique ID" });
+    }
     const finalType = text ? inputType || "text" : "file";
     const content = text || null;
 
@@ -32,6 +43,10 @@ const uploadContent = async (req, res) => {
         resource_type: "auto",
       });
 
+      if (!result || !result.secure_url) {
+        return res.status(500).json({ error: "Failed to upload file" });
+      }
+
       file_url = result.secure_url;
       file_type = result.resource_type;
       file_name = result.original_filename;
@@ -39,11 +54,11 @@ const uploadContent = async (req, res) => {
 
     await pool.query(
       `INSERT INTO uploads (
-        id, title, type, content, file_url, file_name, file_type, 
-        created_at, expires_at, is_public, user_id, views
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,DEFAULT,$8,$9,$10,DEFAULT
-      )`,
+          id, title, type, content, file_url, file_name, file_type,
+          created_at, expires_at, is_public, user_id, views
+        ) VALUES (
+          $1,$2,$3,$4,$5,$6,$7,DEFAULT,$8,$9,$10,DEFAULT
+        )`,
       [
         id,
         title || null,

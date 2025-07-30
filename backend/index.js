@@ -3,13 +3,15 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const uploadRoutes = require("./routes/uploadRoutes");
+const viewRoutes = require("./routes/viewRoutes");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", uploadRoutes);
+app.use("/api", viewRoutes);
 
-// 🟢 Root
+// Root
 app.get("/", (req, res) => {
   res.send("DyShareX Backend is Running ✅");
 });

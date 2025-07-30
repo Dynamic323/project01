@@ -1,4 +1,3 @@
-"use client";
 
 import * as React from "react";
 import {
@@ -16,7 +15,7 @@ import {
   AiOutlineFileText,
   AiOutlineDelete,
 } from "react-icons/ai";
-import Navbar from "./Components/Navbar";
+// import Navbar from "./Components/Navbar";
 import Hero from "./Components/Hero";
 
 function App() {

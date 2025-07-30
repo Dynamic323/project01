@@ -36,8 +36,6 @@ function User_Layout() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  console.log(sidebarCollapsed);
-
   const sidebarItems = [
     {
       title: "Dashboard",

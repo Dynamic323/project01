@@ -162,7 +162,7 @@ function Login() {
               {loading ? <Spinner /> : "Login"}
             </button>
             <span className="text-slate-400  ">
-              Don't have an Account ?{" "}
+              Don't have an Account ?
               <Link to="/register">
                 <span>
                   <i className="text-red-400 underline">Create new account</i>

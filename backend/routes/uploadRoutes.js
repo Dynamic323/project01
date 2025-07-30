@@ -8,6 +8,7 @@ const validateUpload = require("../validations/uploadValidator");
 
 const storage = multer.diskStorage({
   destination: "uploads/",
+
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
@@ -18,3 +19,4 @@ const upload = multer({ storage });
 router.post("/upload", upload.single("file"), validateUpload, uploadContent);
 
 module.exports = router;
+

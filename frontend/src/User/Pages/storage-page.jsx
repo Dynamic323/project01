@@ -1,5 +1,9 @@
-
-import { AiOutlineDatabase, AiOutlineCloudUpload, AiOutlinePieChart, AiOutlineFile } from "react-icons/ai"
+import {
+  AiOutlineDatabase,
+  AiOutlineCloudUpload,
+  AiOutlinePieChart,
+  AiOutlineFile,
+} from "react-icons/ai";
 
 export function StoragePage() {
   const storageData = {
@@ -7,14 +11,14 @@ export function StoragePage() {
     total: 10,
     files: 156,
     folders: 12,
-  }
+  };
 
   const fileTypes = [
     { type: "Images", size: 1.2, count: 45, color: "bg-blue-500" },
     { type: "Documents", size: 0.8, count: 32, color: "bg-green-500" },
     { type: "Audio", size: 0.3, count: 28, color: "bg-purple-500" },
     { type: "Videos", size: 0.1, count: 51, color: "bg-orange-500" },
-  ]
+  ];
 
   return (
     <div className="p-8">
@@ -23,7 +27,9 @@ export function StoragePage() {
           <AiOutlineDatabase className="h-8 w-8 text-red-400" />
           Storage Overview
         </h1>
-        <p className="text-slate-400">Monitor your storage usage and manage your files</p>
+        <p className="text-slate-400">
+          Monitor your storage usage and manage your files
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -45,21 +51,28 @@ export function StoragePage() {
               <div className="w-full bg-slate-800 rounded-full h-3 border border-slate-600">
                 <div
                   className="bg-red-400 h-3 rounded-full transition-all duration-300"
-                  style={{ width: `${(storageData.used / storageData.total) * 100}%` }}
+                  style={{
+                    width: `${(storageData.used / storageData.total) * 100}%`,
+                  }}
                 ></div>
               </div>
               <div className="text-sm text-slate-400 mt-1">
-                {((storageData.used / storageData.total) * 100).toFixed(1)}% of your storage is used
+                {((storageData.used / storageData.total) * 100).toFixed(1)}% of
+                your storage is used
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-800 border border-slate-600 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">{storageData.files}</div>
+                <div className="text-2xl font-bold text-white">
+                  {storageData.files}
+                </div>
                 <div className="text-slate-400 text-sm">Total Files</div>
               </div>
               <div className="bg-slate-800 border border-slate-600 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">{storageData.folders}</div>
+                <div className="text-2xl font-bold text-white">
+                  {storageData.folders}
+                </div>
                 <div className="text-slate-400 text-sm">Folders</div>
               </div>
             </div>
@@ -74,13 +87,18 @@ export function StoragePage() {
 
             <div className="space-y-4">
               {fileTypes.map((fileType) => (
-                <div key={fileType.type} className="flex items-center justify-between">
+                <div
+                  key={fileType.type}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-3">
                     <div className={`w-4 h-4 rounded ${fileType.color}`}></div>
                     <span className="text-white">{fileType.type}</span>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-slate-400">{fileType.count} files</span>
+                    <span className="text-slate-400">
+                      {fileType.count} files
+                    </span>
                     <span className="text-white">{fileType.size} GB</span>
                   </div>
                 </div>
@@ -123,5 +141,5 @@ export function StoragePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
