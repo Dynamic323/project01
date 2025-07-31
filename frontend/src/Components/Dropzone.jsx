@@ -14,6 +14,8 @@ import Modal from "./Modal";
 import Loader from "./Loader";
 import Spinner from "./Spinner";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
+import useUploader from "../hooks/useUploader";
 
 export function Dropzone() {
   const [uploadType, setUploadType] = React.useState("files");
@@ -21,11 +23,14 @@ export function Dropzone() {
   const [files, setFiles] = React.useState([]);
   const [textContent, setTextContent] = React.useState("");
   const [Showmodal, setShowmodal] = React.useState(false);
-  const [expiresAt, setExpiresAt] = useState("");
+  const [expiresAt, setExpiresAt] = React.useState("");
   const [dayName, setDayName] = React.useState("");
-  const [type, setType] = React.useState("");
+  const [Texttype, setTextType] = React.useState("text");
   const [isPublic, setIsPublic] = React.useState(true);
   const [sl, setsl] = React.useState(false);
+  const [textTitle, settextTitle] = React.useState("");
+  const [fileName, setfileName] = useState("");
+  const { uploading, error, success, uploadFile } = useUploader("/upload");
 
   // const [isDateEditable, setIsDateEditable] = React.useState(false);
   const handleDragOver = (e) => {
@@ -79,15 +84,47 @@ export function Dropzone() {
     // const res = await api.HandelUpload(DataObj);
   };
 
-  const HandelSubmit = (e) => {
+  const HandelSubmit = async (e) => {
     e.preventDefault();
-
-    if (!textContent && files.length === 0) {
-      alert("Please enter some text or select files to upload.");
+    if (!textTitle && files.length === 0) {
+      toast.error("Please enter some text or select files to upload.");
       return;
     }
-  };
 
+    setsl(true);
+
+    try {
+      // If no files are selected, upload text content
+
+      let response = null;
+
+      if (files.length !== 0) {
+        response = await uploadFile({
+          file: files,
+          fileName: fileName,
+          type: "file",
+          expiresAt: expiresAt,
+          isPublic: isPublic,
+        });
+      } else {
+        response = await uploadFile({
+          Texttype: Texttype,
+          textContent: textContent,
+          textTitle: textTitle,
+          expiresAt: expiresAt,
+          isPublic: isPublic,
+        });
+      }
+
+      console.log(files);
+
+      setsl(false);
+      toast.success("Upload successful! Link generated.");
+      console.log("Upload response:", response);
+    } catch (error) {
+      setsl(false);
+    }
+  };
   useEffect(() => {
     const now = new Date();
     const expiresDate = new Date(now.setDate(now.getDate() + 2)); // 2 days from now
@@ -98,6 +135,7 @@ export function Dropzone() {
     }); // e.g., "Thursday"
     setDayName(dayOfWeek);
   }, []);
+
   if (Showmodal) {
     return (
       <>
@@ -107,13 +145,25 @@ export function Dropzone() {
               <div className=" gap-5 flex items-start flex-col  justify-center">
                 <div className="">
                   <label htmlFor="title" className=" text-slate-100  text-xl">
-                    <span className="mr-2"> Save as (Title) : </span>
+                    <span className="mr-2">
+                      {" "}
+                      {uploadType === "files"
+                        ? "file Name"
+                        : "Save as (Title)"}{" "}
+                      :{" "}
+                    </span>
                   </label>
                   <input
                     className="text-2xl p-1 outline-0 border-b border-2 border-slate-600 rounded"
                     type="text"
                     name=""
                     id="title"
+                    value={uploadType === "files" ? fileName : textTitle}
+                    onChange={(e) => {
+                      uploadFile === "files"
+                        ? setfileName(e.target.value)
+                        : settextTitle(e.target.value);
+                    }}
                   />
                 </div>
 
@@ -158,8 +208,8 @@ export function Dropzone() {
                   <label className="block mb-1">Type:</label>
                   <select
                     className="w-full bg-slate-800 p-2 rounded"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
+                    value={Texttype}
+                    onChange={(e) => setUploadType(e.target.value)}
                   >
                     <option value="text">Text</option>
                     <option value="code">Code</option>
@@ -168,7 +218,8 @@ export function Dropzone() {
 
                 <div className=" flex items-center gap-3">
                   <button
-                    onClick={generateShareLink}
+                    // onClick={generateShareLink}
+                    type="submit"
                     className="group cursor-pointer flex items-center gap-3 px-4 py-2 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all duration-300 font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40"
                   >
                     {sl ? (
