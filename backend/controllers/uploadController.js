@@ -5,7 +5,6 @@ const cloudinary = require("../config/cloudinary");
 
 const uploadContent = async (req, res) => {
   const request = req.body;
-  const file = req.file;
 
   try {
     const {
@@ -16,12 +15,15 @@ const uploadContent = async (req, res) => {
       type: inputType,
       userId,
     } = req.body;
-
-    if (!text && !req.file) {
+    let files = [];
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      files = req.files;
+    } else if (req.file) {
+      files = [req.file];
+    }
+    if (!text && (!files || files.length === 0)) {
       return res.status(400).json({ error: "Either text or file is required" });
     }
-
-    const file = req.file;
 
     const id = uuidv4().slice(0, 8); // Shorten UUID for easier URLs
     if (!id) {
@@ -34,22 +36,20 @@ const uploadContent = async (req, res) => {
       ? new Date(expiresAt)
       : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // +3 days
 
-    let file_url = null;
-    let file_type = null;
-    let file_name = null;
+    let file_urls = [];
+    let file_names = [];
+    let file_types = [];
 
-    if (file) {
+    for (const file of files) {
       const result = await cloudinary.uploader.upload(file.path, {
         resource_type: "auto",
       });
-
       if (!result || !result.secure_url) {
         return res.status(500).json({ error: "Failed to upload file" });
       }
-
-      file_url = result.secure_url;
-      file_type = result.resource_type;
-      file_name = result.original_filename;
+      file_urls.push(result.secure_url);
+      file_names.push(result.original_filename);
+      file_types.push(result.resource_type);
     }
 
     await pool.query(
@@ -64,9 +64,9 @@ const uploadContent = async (req, res) => {
         title || null,
         finalType,
         content,
-        file_url,
-        file_name,
-        file_type,
+        file_urls.join(","),
+        file_names.join(","),
+        file_types.join(","),
         expires_at,
         isPublic !== undefined ? isPublic : true,
         userId || null,
@@ -80,7 +80,9 @@ const uploadContent = async (req, res) => {
         id,
         type: finalType,
         content,
-        file_url,
+        file_urls: file_urls.join(",").split(",").filter(Boolean),
+        file_names: file_names.join(",").split(",").filter(Boolean),
+        file_types: file_types.join(",").split(",").filter(Boolean),
       },
     });
   } catch (err) {

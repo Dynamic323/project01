@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AiOutlineCloudUpload,
   AiOutlineFile,
@@ -13,26 +12,26 @@ import {
 import Modal from "./Modal";
 import Loader from "./Loader";
 import Spinner from "./Spinner";
-import { useEffect } from "react";
 import { toast } from "react-toastify";
 import useUploader from "../hooks/useUploader";
 
 export function Dropzone() {
-  const [uploadType, setUploadType] = React.useState("files");
-  const [isDragOver, setIsDragOver] = React.useState(false);
-  const [files, setFiles] = React.useState([]);
-  const [textContent, setTextContent] = React.useState("");
-  const [Showmodal, setShowmodal] = React.useState(false);
-  const [expiresAt, setExpiresAt] = React.useState("");
-  const [dayName, setDayName] = React.useState("");
-  const [Texttype, setTextType] = React.useState("text");
-  const [isPublic, setIsPublic] = React.useState(true);
-  const [sl, setsl] = React.useState(false);
-  const [textTitle, settextTitle] = React.useState("");
-  const [fileName, setfileName] = useState("");
+  const [uploadType, setUploadType] = useState("files");
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [files, setFiles] = useState([]);
+  const [textContent, setTextContent] = useState("");
+  const [Showmodal, setShowmodal] = useState(false);
+  const [expiresAt, setExpiresAt] = useState("");
+  const [dayName, setDayName] = useState("");
+  const [Texttype, setTextType] = useState("text");
+  const [isPublic, setIsPublic] = useState(true);
+  const [sl, setsl] = useState(false);
+  const [textTitle, settextTitle] = useState("");
+  const [fileName, setfileName] = useState([]);
+
   const { uploading, error, success, uploadFile } = useUploader("/upload");
 
-  // const [isDateEditable, setIsDateEditable] = React.useState(false);
+  // const [isDateEditable, setIsDateEditable] = useState(false);
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -71,55 +70,75 @@ export function Dropzone() {
     return <AiOutlineFile className="h-4 w-4 text-red-400" />;
   };
 
-  const Haldelgenerate = () => {
-    setShowmodal(true);
+  const handelFilenameChange = (index, newName) => {
+    let UpdfileName = [...fileName];
+
+    UpdfileName[index] = newName;
+
+    setfileName(UpdfileName);
+
+    let UpdatedFiles = [...files];
+    UpdatedFiles = { ...UpdatedFiles[index], name: newName };
+
+    setFiles(UpdatedFiles);
   };
 
-  const generateShareLink = async () => {
-    setsl(true);
-    // const DataObj = {
-    //   textInput: textContent,
-    //   selectedFiles: files,
-    // };
-    // const res = await api.HandelUpload(DataObj);
+  const Reset = () => {
+    setFiles([]);
+    setTextContent("");
+    settextTitle("");
+  };
+
+  const Haldelgenerate = () => {
+    console.log(textContent);
+    console.log(files.length);
+
+    if (textContent == "" && files.length == 0) {
+      toast.error("Please enter some text or select files to upload.");
+      setsl(false);
+      return;
+    }
+    setShowmodal(true);
+
+    setfileName(files.map((file) => file.name));
   };
 
   const HandelSubmit = async (e) => {
     e.preventDefault();
-    if (!textTitle && files.length === 0) {
+    setsl(true);
+    if (uploadType !== "files" && !textTitle && files.length === 0) {
       toast.error("Please enter some text or select files to upload.");
+      setsl(false);
       return;
     }
 
-    setsl(true);
-
     try {
+      setsl(true);
+
       // If no files are selected, upload text content
 
       let response = null;
 
-      if (files.length !== 0) {
+      if (files.length != 0) {
         response = await uploadFile({
-          file: files,
+          files: files, // or just files[0] if single file
           fileName: fileName,
           type: "file",
-          expiresAt: expiresAt,
-          isPublic: isPublic,
+          expiresAt,
+          isPublic,
         });
       } else {
         response = await uploadFile({
-          Texttype: Texttype,
-          textContent: textContent,
-          textTitle: textTitle,
-          expiresAt: expiresAt,
-          isPublic: isPublic,
+          textContent,
+          textTitle,
+          type: Texttype, // "text" or "code"
+          expiresAt,
+          isPublic,
         });
       }
 
-      console.log(files);
-
-      setsl(false);
       toast.success("Upload successful! Link generated.");
+      setsl(false);
       console.log("Upload response:", response);
     } catch (error) {
       setsl(false);
@@ -140,31 +159,54 @@ export function Dropzone() {
     return (
       <>
         <div className=" ">
+          <button
+            className="underline decoration-red-400 px-4 py-2 cursor-pointer"
+            onClick={() => {
+              setShowmodal(false);
+            }}
+          >
+            {" "}
+            Back{" "}
+          </button>
           <div className="shadow-xl h-[400px] flex justify-center items-center">
             <form action="" onSubmit={HandelSubmit}>
               <div className=" gap-5 flex items-start flex-col  justify-center">
-                <div className="">
+                <div className="flex">
                   <label htmlFor="title" className=" text-slate-100  text-xl">
                     <span className="mr-2">
                       {" "}
-                      {uploadType === "files"
-                        ? "file Name"
+                      {uploadType == "files"
+                        ? `file Name${files.length > 1 ? "s" : ""}`
                         : "Save as (Title)"}{" "}
                       :{" "}
                     </span>
                   </label>
-                  <input
-                    className="text-2xl p-1 outline-0 border-b border-2 border-slate-600 rounded"
-                    type="text"
-                    name=""
-                    id="title"
-                    value={uploadType === "files" ? fileName : textTitle}
-                    onChange={(e) => {
-                      uploadFile === "files"
-                        ? setfileName(e.target.value)
-                        : settextTitle(e.target.value);
-                    }}
-                  />
+                  {uploadType == "files" && (
+                    <div>
+                      {files.map((file, index) => {
+                        return (
+                          <>
+                            <span className="" key={index}>
+                              {" "}
+                              {`${file.name}, `}
+                            </span>
+                          </>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {uploadType !== "files" && (
+                    <input
+                      className="text-2xl p-1 outline-0 border-b border-2 border-slate-600 rounded"
+                      type="text"
+                      name=""
+                      id="title"
+                      value={textTitle}
+                      onChange={(e) => {
+                        settextTitle(e.target.value);
+                      }}
+                    />
+                  )}
                 </div>
 
                 {/* Expires At */}
@@ -186,6 +228,7 @@ export function Dropzone() {
                 <div className="flex items-center  mb-2 gap-3">
                   <label className="text-sm">Visibility:</label>
                   <button
+                    type="button"
                     className={`px-3 py-1 rounded ${
                       isPublic ? "bg-red-400" : "bg-slate-600"
                     }`}
@@ -194,6 +237,7 @@ export function Dropzone() {
                     Public
                   </button>
                   <button
+                    type="button"
                     className={`px-4 py-1 rounded ${
                       !isPublic ? "bg-red-400" : "bg-slate-600"
                     }`}
@@ -204,21 +248,22 @@ export function Dropzone() {
                 </div>
 
                 {/* Type */}
-                <div className="flex items-center gap-3">
-                  <label className="block mb-1">Type:</label>
-                  <select
-                    className="w-full bg-slate-800 p-2 rounded"
-                    value={Texttype}
-                    onChange={(e) => setUploadType(e.target.value)}
-                  >
-                    <option value="text">Text</option>
-                    <option value="code">Code</option>
-                  </select>
-                </div>
+                {uploadType !== "files" && (
+                  <div className="flex items-center gap-3">
+                    <label className="block mb-1">Type:</label>
+                    <select
+                      className="w-full bg-slate-800 p-2 rounded"
+                      value={Texttype}
+                      onChange={(e) => setTextType(e.target.value)}
+                    >
+                      <option value="text">Text</option>
+                      <option value="code">Code</option>
+                    </select>
+                  </div>
+                )}
 
                 <div className=" flex items-center gap-3">
                   <button
-                    // onClick={generateShareLink}
                     type="submit"
                     className="group cursor-pointer flex items-center gap-3 px-4 py-2 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all duration-300 font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40"
                   >
@@ -239,7 +284,7 @@ export function Dropzone() {
                   {sl && (
                     <div className="">
                       <button
-                        className="hover:text-red-400 cursor-pointer border border-2 border-red-400 transition-all duration-300 font-bold text-lg shadow-lg  shadow-red-400/40 bg-transparent text-slate-300 px-3 py-1 rounded-2xl"
+                        className="hover:text-red-400 cursor-pointer  border-2 border-red-400 transition-all duration-300 font-bold text-lg shadow-lg  shadow-red-400/40 bg-transparent text-slate-300 px-3 py-1 rounded-2xl"
                         onClick={() => {
                           setsl(false);
                         }}
@@ -265,7 +310,10 @@ export function Dropzone() {
       {/* Toggle Buttons */}
       <div className="flex gap-3 mb-8">
         <button
-          onClick={() => setUploadType("files")}
+          onClick={() => {
+            setUploadType("files");
+            Reset();
+          }}
           className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all duration-200 ${
             uploadType === "files"
               ? "border-red-400 bg-slate-800 text-red-400 shadow-lg shadow-red-400/20"
@@ -276,7 +324,10 @@ export function Dropzone() {
           <span>Upload Files</span>
         </button>
         <button
-          onClick={() => setUploadType("text")}
+          onClick={() => {
+            setUploadType("text");
+            Reset();
+          }}
           className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all duration-200 ${
             uploadType === "text"
               ? "border-red-400 bg-slate-800 text-red-400 shadow-lg shadow-red-400/20"
