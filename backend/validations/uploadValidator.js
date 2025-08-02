@@ -30,12 +30,6 @@ const validateUpload = (req, res, next) => {
       .status(400)
       .json({ error: "File size exceeds the limit (10MB)." });
   }
-  // If a file is provided, ensure the type is 'file'
-  if (file && type !== "file") {
-    return res
-      .status(400)
-      .json({ error: "If uploading a file, the type must be 'file'." });
-  }
 
   // If text is provided, ensure the type is 'text' or 'code'
   if (text && type !== "text" && type !== "code") {

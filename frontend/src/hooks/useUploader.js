@@ -24,9 +24,9 @@ export default function useUploader(uploadUrl) {
 
     if (type === "file" && files.length > 0) {
       files.forEach((file) => {
-        formData.append("file", file);
+        formData.append("file", file || []);
       });
-      formData.append("fileName", fileName || "");
+      formData.append("title", fileName || "");
       formData.append("expiresAt", expiresAt || "");
       formData.append("isPublic", isPublic);
       formData.append("type", type);
@@ -63,6 +63,7 @@ export default function useUploader(uploadUrl) {
         },
       });
       setSuccess(true);
+
       return response.data;
     } catch (err) {
       setError(err.response ? err.response.data.error : "Upload failed");
