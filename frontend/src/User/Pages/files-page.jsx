@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from "react";
 import {
   AiOutlineFile,
   AiOutlinePlus,
@@ -8,51 +8,52 @@ import {
   AiOutlinePicture,
   AiOutlineAudio,
   AiOutlineVideoCamera,
-} from "react-icons/ai"
+} from "react-icons/ai";
+import { useAuth } from "../../context/Authcontext";
+import { toast } from "react-toastify";
 
 export function FilesPage() {
-  const files = [
-    {
-      id: 1,
-      title: "family-vacation.jpg",
-      type: "image",
-      description: "Beach vacation photos from last summer",
-      size: "2.4 MB",
-      views: 156,
-      tags: ["photos", "vacation", "family"],
-    },
-    {
-      id: 2,
-      title: "project-proposal.pdf",
-      type: "document",
-      description: "Business proposal for new client",
-      size: "1.8 MB",
-      views: 89,
-      tags: ["business", "proposal", "document"],
-    },
-    {
-      id: 3,
-      title: "demo-song.mp3",
-      type: "audio",
-      description: "Music demo recording",
-      size: "5.2 MB",
-      views: 203,
-      tags: ["music", "demo", "audio"],
-    },
-  ]
+  const { user } = useAuth();
+  const [files, setFiles] = useState([]);
+const BaseURl = "http://localhost:3000";
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/api/user/${user.uid}`);
+        const data = await response.json();
+        console.log("Fetched files:", data);
+
+        // Make sure we always set an array
+        setFiles(Array.isArray(data) ? data : data.files || []);
+      } catch (error) {
+        console.error("Error fetching files:", error);
+        setFiles([]); // fallback to empty
+      }
+    };
+
+    if (user?.uid) {
+      fetchFiles();
+    }
+  }, [user]);
 
   const getFileIcon = (type) => {
     switch (type) {
       case "image":
-        return <AiOutlinePicture className="h-5 w-5 text-red-400" />
+        return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
       case "audio":
-        return <AiOutlineAudio className="h-5 w-5 text-red-400" />
+        return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
       case "video":
-        return <AiOutlineVideoCamera className="h-5 w-5 text-red-400" />
+        return <AiOutlineVideoCamera className="h-5 w-5 text-red-400" />;
       default:
-        return <AiOutlineFile className="h-5 w-5 text-red-400" />
+        return <AiOutlineFile className="h-5 w-5 text-red-400" />;
     }
-  }
+  };
+
+  const handleCopy = (link) => {
+    navigator.clipboard.writeText(link);
+    // alert("Link copied!");
+    toast.success("Link copied to clipboard!");
+  };
 
   return (
     <div className="p-8">
@@ -83,52 +84,69 @@ export function FilesPage() {
       </div>
 
       <div className="grid gap-6">
-        {files.map((file) => (
-          <div
-            key={file.id}
-            className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-colors"
-          >
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{file.title}</h3>
-                  <p className="text-slate-400 text-sm mt-1">{file.description}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {getFileIcon(file.type)}
-                  <span className="px-2 py-1 bg-slate-800 text-red-400 rounded text-xs border border-slate-600">
-                    {file.type}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 text-sm text-slate-400">
-                  <span>{file.size}</span>
-                  <span className="flex items-center gap-1">
-                    <AiOutlineEye className="h-3 w-3" />
-                    {file.views} views
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {file.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs border border-slate-700"
-                    >
-                      #{tag}
+        {Array.isArray(files) && files.length > 0 ? (
+          files.map((file) => (
+            <div
+              key={file.id}
+              className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-colors"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {file.title}
+                    </h3>
+                    <p className="text-slate-400 text-sm mt-1">
+                      {file.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getFileIcon(file.type)}
+                    <span className="px-2 py-1 bg-slate-800 text-red-400 rounded text-xs border border-slate-600">
+                      {file.type}
                     </span>
-                  ))}
+                  </div>
                 </div>
-                <button className="flex items-center gap-1 px-3 py-1 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded border border-slate-700 hover:border-slate-600 transition-colors text-sm">
-                  <AiOutlineCopy className="h-3 w-3" />
-                  Copy Link
-                </button>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-sm text-slate-400">
+                    <span>{file.size}</span>
+                    <span className="flex items-center gap-1">
+                      <AiOutlineEye className="h-3 w-3" />
+                      {file.views} views
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {file.tags?.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs border border-slate-700"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => handleCopy(`${BaseURl}/files/${file.id}`)}
+                    className="flex items-center gap-1 px-3 py-1 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded border border-slate-700 hover:border-slate-600 transition-colors text-sm"
+                  >
+                    <AiOutlineCopy className="h-3 w-3" />
+                    Copy Link
+                  </button>
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center text-slate-400 pt-6">
+            <p className="mb-4">You have no files uploaded yet......</p>
+            <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-300 transition-colors border border-slate-600 mx-auto">
+              <AiOutlinePlus className="h-4 w-4" />
+              Upload Your First File
+            </button>
           </div>
-        ))}
+        )}
       </div>
     </div>
-  )
+  );
 }

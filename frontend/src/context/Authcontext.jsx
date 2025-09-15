@@ -17,12 +17,33 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const token = await currentUser.getIdToken();
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              uid: currentUser.uid,
+              email: currentUser.email,
+              token,
+            })
+          );
+
+          setUser(currentUser);
+        } catch (err) {
+          console.error("Error fetching token:", err);
+        }
+      } else {
+        // Clear if logged out
+        localStorage.removeItem("user");
+        setUser(null);
+      }
       setLoading(false);
     });
 
-    return unsubscribe; // ✅ CORRECT cleanup
+    return unsubscribe;
   }, []);
 
   const register = (email, password) => {
@@ -33,7 +54,10 @@ export const AuthProvider = ({ children }) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const logout = () => signOut(auth);
+  const logout = () => {
+    localStorage.removeItem("user"); // Clear on logout
+    return signOut(auth);
+  };
 
   const googleSignin = () => {
     const provider = new GoogleAuthProvider();

@@ -5,15 +5,10 @@ const fs = require("fs");
 
 const uploadContent = async (req, res) => {
   try {
-    const {
-      text,
-      expiresAt,
-      isPublic,
-      title,
-      type: inputType,
-      Texttype,
-      userId,
-    } = req.body;
+    const { text, expiresAt, isPublic, title, type, Texttype, user_id } =
+      req.body;
+      // console.log(user_id);
+      
     let files = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       files = req.files;
@@ -24,7 +19,7 @@ const uploadContent = async (req, res) => {
     // If text upload
     if (text && (!files || files.length === 0)) {
       const id = uuidv4().slice(0, 8);
-      const finalType = inputType || "text";
+      const finalType = type;
       const content = text;
       const expires_at = expiresAt
         ? new Date(expiresAt)
@@ -43,7 +38,7 @@ const uploadContent = async (req, res) => {
           content,
           expires_at,
           isPublic !== undefined ? isPublic : true,
-          userId || null,
+          user_id || null,
         ]
       );
 
@@ -74,6 +69,9 @@ const uploadContent = async (req, res) => {
           return res.status(500).json({ error: "Failed to upload file" });
         }
 
+        // Define finalType for file uploads
+        const finalType = "file";
+
         await pool.query(
           `INSERT INTO file_uploads (
             id, title, file_url, file_name, file_type, expires_at, is_public, user_id, views
@@ -85,10 +83,10 @@ const uploadContent = async (req, res) => {
             title || null,
             result.secure_url,
             file.originalname,
-            result.resource_type,
+            finalType, // always 'file' for file uploads
             expires_at,
             isPublic !== undefined ? isPublic : true,
-            userId || null,
+            user_id || null,
           ]
         );
 

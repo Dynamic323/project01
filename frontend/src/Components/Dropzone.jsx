@@ -14,6 +14,7 @@ import Loader from "./Loader";
 import Spinner from "./Spinner";
 import { toast } from "react-toastify";
 import useUploader from "../hooks/useUploader";
+import { useNavigate } from "react-router-dom";
 
 export function Dropzone() {
   const [uploadType, setUploadType] = useState("files");
@@ -28,6 +29,8 @@ export function Dropzone() {
   const [sl, setsl] = useState(false);
   const [textTitle, settextTitle] = useState("");
   const [fileName, setfileName] = useState([]);
+
+  const navigate = useNavigate();
 
   const { uploading, error, success, uploadFile } = useUploader("/upload");
 
@@ -71,28 +74,26 @@ export function Dropzone() {
   };
 
   const handelFilenameChange = (index, newName) => {
-    let UpdfileName = [...fileName];
+    const updatedFiles = [...files];
+    const updatedFile = new File([files[index]], newName, {
+      type: files[index].type,
+    });
+    updatedFiles[index] = updatedFile;
+    setFiles(updatedFiles);
 
-    UpdfileName[index] = newName;
-
-    setfileName(UpdfileName);
-
-    let UpdatedFiles = [...files];
-    UpdatedFiles = { ...UpdatedFiles[index], name: newName };
-
-    setFiles(UpdatedFiles);
+    const updatedFileNames = [...fileName];
+    updatedFileNames[index] = newName;
+    setfileName(updatedFileNames);
   };
 
   const Reset = () => {
     setFiles([]);
     setTextContent("");
     settextTitle("");
+    setfileName([]); // add this
   };
 
   const Haldelgenerate = () => {
-    console.log(textContent);
-    console.log(files.length);
-
     if (textContent == "" && files.length == 0) {
       toast.error("Please enter some text or select files to upload.");
       setsl(false);
@@ -105,16 +106,31 @@ export function Dropzone() {
 
   const HandelSubmit = async (e) => {
     e.preventDefault();
+
     setsl(true);
-    if (uploadType !== "files" && !textTitle && files.length === 0) {
-      toast.error("Please enter some text or select files to upload.");
+
+    if (uploadType === "files" && files.length === 0) {
+      toast.error("Please select files to upload.");
+      setsl(false);
+      return;
+    }
+
+    if (uploadType === "text" && !textContent.trim()) {
+      toast.error("Please enter some text.");
       setsl(false);
       return;
     }
 
     try {
       setsl(true);
-
+      // console.log("Submitting with:", {
+      //     files,
+      //     textContent,
+      //     textTitle,
+      //     expiresAt,
+      //     isPublic,
+      //     Texttype,
+      //   });
       // If no files are selected, upload text content
 
       let response = null;
@@ -126,6 +142,7 @@ export function Dropzone() {
           type: "file",
           expiresAt,
           isPublic,
+          user_id: JSON.parse(localStorage.getItem("user")).uid,
         });
       } else {
         response = await uploadFile({
@@ -134,13 +151,24 @@ export function Dropzone() {
           type: Texttype, // "text" or "code"
           expiresAt,
           isPublic,
+          user_id: JSON.parse(localStorage.getItem("user")).uid,
         });
       }
 
       toast.success("Upload successful! Link generated.");
       setsl(false);
-      console.log("Upload response:", response);
+
+      //  setTimeout(() => {
+
+      //  }
+
+      setTimeout(() => {
+        navigate(`/files/${response.data.data.id}`);
+      }, 4000);
+
+      // console.log("Upload response:", response);
     } catch (error) {
+      toast.error(error?.message || "Upload failed. Please try again.");
       setsl(false);
     }
   };
@@ -266,17 +294,15 @@ export function Dropzone() {
                   <button
                     type="submit"
                     className="group cursor-pointer flex items-center gap-3 px-4 py-2 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all duration-300 font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40"
+                    disabled={sl}
                   >
                     {sl ? (
                       <>
-                        {/* Loading <Spinner /> */}
-                        {/* <Loader text={"Generating Link"} /> */}
                         <Spinner /> Generating Link.....
                       </>
                     ) : (
                       <>
-                        <AiOutlineLink className="h-6 w-6 group-hover:rotate-12 transition-transform duration-300" />
-                        Generate Share Link
+                        <AiOutlineLink /> Generate Share Link
                       </>
                     )}
                   </button>
@@ -412,7 +438,7 @@ export function Dropzone() {
                       <div>
                         <div className="text-white">{file.name}</div>
                         <div className="text-sm text-slate-400">
-                          {(file.size / 1024).toFixed(1)} KB
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
                         </div>
                       </div>
                     </div>

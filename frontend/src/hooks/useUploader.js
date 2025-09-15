@@ -16,6 +16,7 @@ export default function useUploader(uploadUrl) {
     textContent,
     fileName,
     Texttype,
+    user_id
   }) => {
     setUploading(true);
     setError(null);
@@ -28,10 +29,13 @@ export default function useUploader(uploadUrl) {
       });
       formData.append("title", fileName || "");
       formData.append("expiresAt", expiresAt || "");
+      formData.append("user_id", user_id || "");
       formData.append("isPublic", isPublic);
       formData.append("type", type);
     } else if (type === "text" || type === "code") {
       formData.append("type", Texttype || type);
+
+      formData.append("user_id", user_id || "");
       formData.append("title", textTitle || "");
       formData.append("text", textContent);
       formData.append("expiresAt", expiresAt || "");
@@ -42,19 +46,19 @@ export default function useUploader(uploadUrl) {
       return;
     }
 
-    // for (let pair of formData.entries()) {
-    //   if (pair[1] instanceof File) {
-    //     console.log("File:", pair[1]);
-    //     console.log("File details:", {
-    //       name: pair[1].name,
-    //       size: pair[1].size,
-    //       type: pair[1].type,
-    //       lastModified: pair[1].lastModified,
-    //     });
-    //   } else {
-    //     console.log(pair[0] + ":", pair[1]);
-    //   }
-    // }
+    for (let pair of formData.entries()) {
+      if (pair[1] instanceof File) {
+        console.log("File:", pair[1]);
+        console.log("File details:", {
+          name: pair[1].name,
+          size: pair[1].size,
+          type: pair[1].type,
+          lastModified: pair[1].lastModified,
+        });
+      } else {
+        console.log(pair[0] + ":", pair[1]);
+      }
+    }
 
     try {
       const response = await api.post(uploadUrl, formData, {
