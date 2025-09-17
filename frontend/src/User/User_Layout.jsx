@@ -72,9 +72,9 @@ function User_Layout() {
   return (
     <>
       <ToastContainer />
-      {loading && <Loader />}
+      {/* {loading && <Loader />} */}
 
-      {!loading && (
+      {/* {!loading && ( */}
         <div className="h-fit  font-mono	bg-slate-900  text-white">
           <div className="flex  bg-slate-900">
             {/* Sidebar */}
@@ -107,25 +107,38 @@ function User_Layout() {
                 <ul className="space-y-7 ">
                   {sidebarItems.map((item, index) => (
                     <li key={index} className="">
-                      <Link
-                        to={`${item.path}`}
-                        className={`flex items-center ${
-                          sidebarCollapsed
-                            ? "justify-center p-3"
-                            : "justify-start p-3"
-                        } rounded-md hover:bg-slate-700 transition-colors group`}
+                      <NavLink
+                        to={item.path}
+                        end
+                        className={({ isActive }) =>
+                          `flex items-center ${
+                            sidebarCollapsed
+                              ? "justify-center p-3"
+                              : "justify-start p-3"
+                          } rounded-md transition-colors group ${
+                            isActive
+                              ? "bg-slate-700 text-red-400"
+                              : "hover:bg-slate-700 text-slate-300"
+                          }`
+                        }
                       >
                         <item.icon
                           className={`${
                             sidebarCollapsed ? "w-8 h-8" : "w-5 h-5"
-                          } text-slate-300 group-hover:text-red-400 transition-colors`}
+                          } mr-0 ${
+                            sidebarCollapsed ? "" : "group-hover:text-red-400"
+                          } ${({ isActive }) =>
+                            isActive ? "text-red-400" : "text-slate-300"}`}
                         />
                         {!sidebarCollapsed && (
-                          <span className="ml-3 text-slate-300 group-hover:text-red-400 font-medium">
+                          <span
+                            className={`ml-3 font-medium ${({ isActive }) =>
+                              isActive ? "text-red-400" : "text-slate-300"}`}
+                          >
                             {item.label}
                           </span>
                         )}
-                      </Link>
+                      </NavLink>
                     </li>
                   ))}
                 </ul>
@@ -136,7 +149,7 @@ function User_Layout() {
             </div>
           </div>
         </div>
-      )}
+      {/* )} */}
     </>
   );
 }

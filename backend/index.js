@@ -11,8 +11,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // or use '*' for all origins (not recommended for production)
-    credentials: true, // if you use cookies or authentication
+    origin: "http://localhost:5173",
+    credentials: true,
   })
 );
 

@@ -11,6 +11,7 @@ import { HistoryPage } from "./User/HistoryPage";
 import { SettingsPage } from "./User/SettingsPage";
 import { FilesPage } from "./User/Pages/files-page";
 import { StoragePage } from "./User/Pages/storage-page";
+import { DashboardProvider } from "./context/DashboardContext ";
 
 export const router = createBrowserRouter([
   {
@@ -35,7 +36,9 @@ export const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <ProtectedRoute>
-        <User_Layout />
+        <DashboardProvider>
+          <User_Layout />
+        </DashboardProvider>
       </ProtectedRoute>
     ),
     children: [
@@ -53,8 +56,8 @@ export const router = createBrowserRouter([
         element: <HistoryPage />,
       },
       {
-        path:"storage",
-        element:<StoragePage/>
+        path: "storage",
+        element: <StoragePage />,
       },
       {
         path: "settings",
