@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import {
   AiOutlineCloudUpload,
@@ -91,7 +90,7 @@ function App() {
       price: "$0",
       period: "forever",
       features: [
-        "10 GB Storage",
+        "500 mb Storage",
         "Unlimited public shares",
         "Basic file management",
         "Email support",

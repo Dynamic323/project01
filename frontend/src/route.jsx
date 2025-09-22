@@ -12,6 +12,7 @@ import { SettingsPage } from "./User/SettingsPage";
 import { FilesPage } from "./User/Pages/files-page";
 import { StoragePage } from "./User/Pages/storage-page";
 import { DashboardProvider } from "./context/DashboardContext ";
+import Index from "./ViewContent/Index";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ export const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "view/:id",
+        element: <Index />,
       },
     ],
   },

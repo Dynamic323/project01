@@ -10,13 +10,13 @@ export default function useUploader(uploadUrl) {
   const uploadFile = async ({
     files,
     type,
-    textTitle,
+    contentTitle,
     expiresAt,
     isPublic,
     textContent,
     fileName,
     Texttype,
-    user_id
+    user_id,
   }) => {
     setUploading(true);
     setError(null);
@@ -25,7 +25,9 @@ export default function useUploader(uploadUrl) {
 
     if (type === "file" && files.length > 0) {
       files.forEach((file) => {
-        formData.append("file", file || []);
+        formData.append("file", file);
+        formData.append("file_size", file.size);
+        formData.append("file_type", file.type);
       });
       formData.append("title", fileName || "");
       formData.append("expiresAt", expiresAt || "");
@@ -36,7 +38,7 @@ export default function useUploader(uploadUrl) {
       formData.append("type", Texttype || type);
 
       formData.append("user_id", user_id || "");
-      formData.append("title", textTitle || "");
+      formData.append("title", contentTitle || "");
       formData.append("text", textContent);
       formData.append("expiresAt", expiresAt || "");
       formData.append("isPublic", isPublic);

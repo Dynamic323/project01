@@ -18,7 +18,8 @@ export function FilesPage() {
   const { getValue, setValue } = useDashboard();
   const files = getValue("files");
   const [loading, setLoading] = useState(false);
-  const BaseURl = "http://localhost:3000";
+  const BaseURl = import.meta.env.VITE_BASE_URL;
+  
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -29,6 +30,7 @@ export function FilesPage() {
           const data = await res.json();
           setValue("files", Array.isArray(data) ? data : data.files || []);
         } catch (err) {
+          toast.error("Error fetching files");
           console.error("Error fetching files:", err);
           setValue("files", []);
         } finally {
@@ -43,6 +45,10 @@ export function FilesPage() {
     switch (type) {
       case "image":
         return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
+      case "image/png":
+        return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
+      case "audio/mpeg":
+        return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
       case "audio":
         return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
       case "video":
@@ -55,6 +61,14 @@ export function FilesPage() {
   const handleCopy = (link) => {
     navigator.clipboard.writeText(link);
     toast.success("Link copied to clipboard!");
+  };
+
+  const formatSize = (bytes) => {
+    const b = Number(bytes);
+    if (!b) return "0 B";
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(b) / Math.log(1024));
+    return `${(b / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
   return (
@@ -106,22 +120,22 @@ export function FilesPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      {getFileIcon(file.type)}
+                      {getFileIcon(file.file_type)}
                       <span className="px-2 py-1 bg-slate-800 text-red-400 rounded text-xs border border-slate-600">
-                        {file.type}
+                        {file.file_type}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm text-slate-400">
-                      <span>{file.size}</span>
+                      <span>{formatSize(file.file_size)}</span>
                       <span className="flex items-center gap-1">
                         <AiOutlineEye className="h-3 w-3" />
                         {file.views} views
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       {file.tags?.map((tag) => (
                         <span
                           key={tag}
@@ -130,9 +144,9 @@ export function FilesPage() {
                           #{tag}
                         </span>
                       ))}
-                    </div>
+                    </div> */}
                     <button
-                      onClick={() => handleCopy(`${BaseURl}/files/${file.id}`)}
+                      onClick={() => handleCopy(`${BaseURl}/view/${file.id}`)}
                       className="flex items-center gap-1 px-3 py-1 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded border border-slate-700 hover:border-slate-600 transition-colors text-sm"
                     >
                       <AiOutlineCopy className="h-3 w-3" />

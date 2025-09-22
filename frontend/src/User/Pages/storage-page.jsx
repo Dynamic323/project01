@@ -1,24 +1,59 @@
+import { useEffect, useState } from "react";
 import {
   AiOutlineDatabase,
   AiOutlineCloudUpload,
   AiOutlinePieChart,
   AiOutlineFile,
 } from "react-icons/ai";
+import { useAuth } from "../../context/Authcontext";
+import { toast } from "react-toastify";
+
+const typeColors = {
+  Images: "bg-blue-500",
+  Documents: "bg-green-500",
+  Audio: "bg-purple-500",
+  Videos: "bg-orange-500",
+};
+
+function formatMB(mb) {
+  if (mb === null || mb === undefined) return "0 MB";
+  const n = Number(mb);
+  if (n >= 1024) return `${(n / 1024).toFixed(2)} GB`;
+  return `${n.toFixed(2)} MB`;
+}
 
 export function StoragePage() {
-  const storageData = {
-    used: 2.4,
-    total: 10,
-    files: 156,
-    folders: 12,
-  };
+  const { user } = useAuth();
 
-  const fileTypes = [
-    { type: "Images", size: 1.2, count: 45, color: "bg-blue-500" },
-    { type: "Documents", size: 0.8, count: 32, color: "bg-green-500" },
-    { type: "Audio", size: 0.3, count: 28, color: "bg-purple-500" },
-    { type: "Videos", size: 0.1, count: 51, color: "bg-orange-500" },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [storageData, setStorageData] = useState(null);
+
+  useEffect(() => {
+    async function fetchStorage() {
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/storage-info/${user.uid}`
+        );
+        const data = await res.json();
+        console.log(data);
+
+        setStorageData(data);
+      } catch (err) {
+        toast.error("Failed to fetch storage details")
+        console.error("Failed to fetch storage:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStorage();
+  }, []);
+
+  if (loading) return <div className="p-8 text-white">Loading storage…</div>;
+  if (!storageData)
+    return <div className="p-8 text-red-400">Failed to load storage.</div>;
+
+  const { used, total, files, text, types, remaining } = storageData;
+  const pct = total > 0 ? Math.min(100, (used / total) * 100) : 0;
 
   return (
     <div className="p-8">
@@ -28,12 +63,12 @@ export function StoragePage() {
           Storage Overview
         </h1>
         <p className="text-slate-400">
-          Monitor your storage usage and manage your files
+          Monitor your storage usage and manage your files & texts
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Storage Overview */}
+        {/* Main */}
         <div className="lg:col-span-2">
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
@@ -41,73 +76,103 @@ export function StoragePage() {
               Storage Usage
             </h2>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-slate-300">Space Used</span>
                 <span className="text-white">
-                  {storageData.used} GB of {storageData.total} GB
+                  {formatMB(used)} of {formatMB(total)}
                 </span>
               </div>
+
               <div className="w-full bg-slate-800 rounded-full h-3 border border-slate-600">
                 <div
                   className="bg-red-400 h-3 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${(storageData.used / storageData.total) * 100}%`,
-                  }}
-                ></div>
+                  style={{ width: `${pct}%` }}
+                />
               </div>
               <div className="text-sm text-slate-400 mt-1">
-                {((storageData.used / storageData.total) * 100).toFixed(1)}% of
-                your storage is used
+                {pct.toFixed(1)}% used • {formatMB(remaining)} remaining
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-800 border border-slate-600 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">
-                  {storageData.files}
-                </div>
+                <div className="text-2xl font-bold text-white">{files}</div>
                 <div className="text-slate-400 text-sm">Total Files</div>
               </div>
               <div className="bg-slate-800 border border-slate-600 rounded-lg p-4">
-                <div className="text-2xl font-bold text-white">
-                  {storageData.folders}
+                <div className="text-2xl font-bold text-white">{text}</div>
+                <div className="text-slate-400 text-sm">
+                  Text uploads (text + code)
                 </div>
-                <div className="text-slate-400 text-sm">Folders</div>
               </div>
             </div>
           </div>
 
-          {/* File Types Breakdown */}
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+          {/* File Types */}
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
               <AiOutlineFile className="h-5 w-5 text-red-400" />
               File Types
             </h2>
 
             <div className="space-y-4">
-              {fileTypes.map((fileType) => (
-                <div
-                  key={fileType.type}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded ${fileType.color}`}></div>
-                    <span className="text-white">{fileType.type}</span>
+              {Array.isArray(types?.file) &&
+                types.file.map((ft) => (
+                  <div
+                    key={ft.type}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-4 h-4 rounded ${
+                          typeColors[ft.type] || "bg-gray-500"
+                        }`}
+                      />
+                      <span className="text-white">{ft.type}</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-slate-400">{ft.count} files</span>
+                      <span className="text-white">{formatMB(ft.size)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-slate-400">
-                      {fileType.count} files
-                    </span>
-                    <span className="text-white">{fileType.size} GB</span>
-                  </div>
-                </div>
-              ))}
+                ))}
+            </div>
+          </div>
+
+          {/* Text Types - similar style to File Types */}
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
+              <AiOutlineFile className="h-5 w-5 text-red-400" />
+              Text / Code Usage
+            </h2>
+
+            <div className="space-y-4">
+              {types?.text ? (
+                <>
+                  {Object.entries(types.text).map(([k, v]) => (
+                    <div key={k} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded bg-slate-600" />
+                        <span className="text-white">{k}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="text-slate-400">{v.count} items</span>
+                        <span className="text-white">
+                          {formatMB(v.amountUsed)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="text-slate-400">No text data</div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Storage Actions */}
+        {/* Sidebar */}
         <div className="space-y-6">
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
             <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
@@ -128,7 +193,7 @@ export function StoragePage() {
             <div className="space-y-4">
               <div className="p-3 bg-slate-800 border border-slate-600 rounded-lg">
                 <div className="text-white font-semibold">Free Plan</div>
-                <div className="text-sm text-slate-400">10 GB Storage</div>
+                <div className="text-sm text-slate-400">500 MB Storage</div>
                 <div className="text-xs text-red-400 mt-1">Current Plan</div>
               </div>
               <div className="p-3 bg-slate-800 border border-slate-600 rounded-lg">
