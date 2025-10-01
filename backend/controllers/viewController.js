@@ -74,33 +74,35 @@ exports.viewUpload = async (req, res) => {
     }
 
     // If not a file or type is 'text', check if it's text
-    // if (type === "text" || type === "auto") {
-    //   const textResult = await pool.query(
-    //     "SELECT * FROM text_uploads WHERE id = $1",
-    //     [id]
-    //   );
+    if (type === "text" || type === "auto") {
+      const textResult = await pool.query(
+        "SELECT * FROM text_uploads WHERE id = $1",
+        [id]
+      );
 
-    //   if (textResult.rows.length > 0) {
-    //     const text = textResult.rows[0];
+      if (textResult.rows.length > 0) {
+        const text = textResult.rows[0];
 
-    //     // Update views count
-    //     await pool.query(
-    //       "UPDATE text_uploads SET views = views + 1 WHERE id = $1",
-    //       [id]
-    //     );
+        console.log(text);
 
-    //     return res.json({
-    //       id: text.id,
-    //       title: text.title,
-    //       type: text.type || "text",
-    //       originalType: "text",
-    //       content: text.text_content,
-    //       createdAt: text.created_at,
-    //       views: text.views,
-    //       isPublic: text.is_public,
-    //     });
-    //   }
-    // }
+        // Update views count
+        await pool.query(
+          "UPDATE text_uploads SET views = views + 1 WHERE id = $1",
+          [id]
+        );
+
+        return res.json({
+          id: text.id,
+          title: text.title,
+          type: text.type || "text",
+          originalType: "text",
+          content: text.content,
+          createdAt: text.created_at,
+          views: text.views,
+          isPublic: text.is_public,
+        });
+      }
+    }
 
     // If we get here, nothing was found
     return res.status(404).json({ error: "Upload not found" });

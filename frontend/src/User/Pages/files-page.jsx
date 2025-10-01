@@ -9,14 +9,20 @@ import {
   AiOutlineAudio,
   AiOutlineVideoCamera,
   AiOutlineDelete,
-  AiOutlineArrowLeft,
-  AiOutlineArrowRight,
   AiOutlineExclamationCircle,
 } from "react-icons/ai";
 import { useAuth } from "../../context/Authcontext";
 import { useDashboard } from "../../context/DashboardContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import {
+  formatDate,
+  formatSize,
+  getFileIcon,
+  handleCopy,
+} from "../../utils/file-helper";
+import { LazyImage } from "../../Components/LazyImage";
+import { Pagination } from "../../Components/Pagination";
 
 export function FilesPage() {
   const { user } = useAuth();
@@ -32,9 +38,17 @@ export function FilesPage() {
   const BackendURL = import.meta.env.VITE_APP_API_URL;
   const navigate = useNavigate();
 
-  // ---- Fetch files from server with pagination + search ----
   const fetchFiles = async (page = 1, search = "") => {
     if (!user?.uid) return;
+
+    const cachedFiles = getValue("files");
+
+    // Use cached files if available and no search term
+    if (cachedFiles && !search && page === 1) {
+      setFiles(cachedFiles);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(
@@ -48,10 +62,12 @@ export function FilesPage() {
       const data = await res.json();
       setFiles(data.files || []);
       setTotalPages(data.pagination?.totalPages || 1);
-      setValue("files_page_" + page + "_" + search, data.files); // optional caching
+      setValue("files", data.files);
     } catch (err) {
-      console.error(err);
       toast.error("Error fetching files");
+      console.error(err);
+      setFiles([]);
+      setValue("files", []);
     } finally {
       setLoading(false);
     }
@@ -61,77 +77,22 @@ export function FilesPage() {
     fetchFiles(currentPage, searchTerm);
   }, [currentPage, searchTerm, user]);
 
-  // ---- Utility helpers ----
-  const getFileIcon = (type) => {
-    if (!type) return <AiOutlineFile className="h-5 w-5 text-red-400" />;
-    if (type.startsWith("image/"))
-      return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
-    if (type.startsWith("audio/"))
-      return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
-    if (type.startsWith("video/"))
-      return <AiOutlineVideoCamera className="h-5 w-5 text-red-400" />;
-    return <AiOutlineFile className="h-5 w-5 text-red-400" />;
-  };
-
-  const formatSize = (b) => {
-    const sizes = ["B", "KB", "MB", "GB"];
-    if (!b) return "0 B";
-    const i = Math.floor(Math.log(b) / Math.log(1024));
-    return `${(b / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
-  };
-
-  const formatDate = (date) =>
-    new Date(date).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-
-  const handleCopy = (link) => {
-    navigator.clipboard.writeText(link);
-    toast.success("Link copied!");
-  };
-
   const handleDelete = async (id) => {
     try {
-      const res = await fetch(`${BaseURL}/api/files/${id}`, {
+      const res = await fetch(`${BackendURL}/api/files/${id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error("Failed to delete file");
       toast.success("File deleted");
       setShowConfirm(false);
-      fetchFiles(currentPage, searchTerm); // refresh
-    } catch {
+      fetchFiles(currentPage, searchTerm);
+    } catch (err) {
       toast.error("Failed to delete file");
+      console.error(err);
     }
   };
 
   const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
-
-  // ---- Lazy image with placeholder ----
-  const LazyImage = ({ src, alt }) => {
-    const [loaded, setLoaded] = useState(false);
-    return (
-      <div className="h-32 bg-slate-900 overflow-hidden">
-        {!loaded && (
-          <img
-            src="/placeholder.png"
-            alt="placeholder"
-            className="w-full h-full object-cover animate-pulse"
-          />
-        )}
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          onLoad={() => setLoaded(true)}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${
-            loaded ? "opacity-100" : "opacity-0 absolute"
-          }`}
-        />
-      </div>
-    );
-  };
 
   return (
     <div className="p-6 md:p-8">
@@ -178,7 +139,6 @@ export function FilesPage() {
               {file.file_type?.startsWith("image/") && (
                 <LazyImage src={file.file_url} alt={file.title || "image"} />
               )}
-
               <div className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-bold text-white truncate">
@@ -191,7 +151,6 @@ export function FilesPage() {
                     </span>
                   </div>
                 </div>
-
                 <div className="space-y-1 mb-4 text-sm">
                   <div className="flex justify-between text-slate-400">
                     <span>Size</span>{" "}
@@ -218,7 +177,6 @@ export function FilesPage() {
                     </span>
                   </div>
                 </div>
-
                 <div className="flex gap-2">
                   <button
                     onClick={() => handlePreview(file.id)}
@@ -227,7 +185,7 @@ export function FilesPage() {
                     <AiOutlineEye className="inline h-3 w-3" /> Preview
                   </button>
                   <button
-                    onClick={() => handleCopy(`${BaseURL}/view/${file.id}`)}
+                    onClick={() => handleCopy(`${BackendURL}/view/${file.id}`)}
                     className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
                   >
                     <AiOutlineCopy className="inline h-3 w-3" /> Copy
@@ -255,37 +213,11 @@ export function FilesPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-1">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="p-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
-          >
-            <AiOutlineArrowLeft />
-          </button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              onClick={() => setCurrentPage(n)}
-              className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                n === currentPage
-                  ? "bg-red-400 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="p-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
-          >
-            <AiOutlineArrowRight />
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       {/* Delete Modal */}

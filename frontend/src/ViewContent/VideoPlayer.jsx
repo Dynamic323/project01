@@ -6,8 +6,10 @@ import {
   FaVolumeMute,
   FaExpand,
 } from "react-icons/fa";
+import { formatSize } from "../utils/file-helper";
+import { Download } from "lucide-react";
 
-export function VideoPlayer({ src, title }) {
+export function VideoPlayer({ src, title, dwn_url, size }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [currentTime, setCurrentTime] = useState(0);
@@ -18,7 +20,6 @@ export function VideoPlayer({ src, title }) {
   useEffect(() => {
     const video = videoRef.current;
 
-    console.log(video);
 
     const updateTime = () => setCurrentTime(video.currentTime);
     const updateDuration = () => setDuration(video.duration);
@@ -57,6 +58,15 @@ export function VideoPlayer({ src, title }) {
     }
   };
 
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = dwn_url;
+    link.setAttribute("download", title || "video.mp4"); // suggest filename
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   const toggleFullscreen = () => {
     if (!isFullscreen) {
       if (videoRef.current.requestFullscreen) {
@@ -89,7 +99,13 @@ export function VideoPlayer({ src, title }) {
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-white">{title}</h1>
+        {/* <h1 className="text-2xl font-bold text-white flex justify-between"> */}
+        {/* <span>{title}</span>
+          <span className="text-1xl text-gray-500">
+            {" "}
+            size: <span className="text-red-400">{formatSize(size)}</span>
+          </span>
+        </h1> */}
       </div>
 
       <div className="p-6 bg-black relative">
@@ -154,6 +170,14 @@ export function VideoPlayer({ src, title }) {
               </button>
             </div>
           </div>
+          {/* Download Button */}
+          {/* <button
+            onClick={handleDownload}
+            className="flex justify-center items-center cursor-pointer gap-3 px-8 py-4 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all font-bold shadow-lg hover:shadow-red-400/40"
+          >
+            <Download />
+            Download
+          </button> */}
         </div>
       </div>
     </div>

@@ -14,11 +14,12 @@ import { StoragePage } from "./User/Pages/storage-page";
 import Index from "./ViewContent/Index";
 import { DashboardProvider } from "./context/DashboardContext";
 import TextPage from "./User/Pages/text-page";
+import { NotFoundPage } from "./NotFoundPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,  
+    element: <Layout />,
     children: [
       {
         index: true,
@@ -31,10 +32,6 @@ export const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
-      },
-      {
-        path: "view/:id",
-        element: <Index />,
       },
     ],
   },
@@ -74,5 +71,13 @@ export const router = createBrowserRouter([
         element: <SettingsPage />,
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
+  },
+  {
+    path: "view/:id",
+    element: <Index />,
   },
 ]);

@@ -20,7 +20,7 @@ export function PdfViewer({ url, title }) {
   return (
     <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-700">
-        <h1 className="text-2xl font-bold text-white">{title}</h1>
+        {/* <h1 className="text-2xl font-bold text-white">{title}</h1> */}
       </div>
 
       <div className="p-6 bg-gray-900">

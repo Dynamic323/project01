@@ -39,7 +39,6 @@ export default function TextPage() {
           `${BaseURL}/user/text/${user.uid}?page=1&limit=${itemsPerPage}&search=`
         );
         const data = await res.json();
-        console.log(data);
 
         const textData = Array.isArray(data) ? data : data.texts || [];
         setTexts(textData);
