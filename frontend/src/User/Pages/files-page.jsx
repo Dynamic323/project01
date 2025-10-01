@@ -8,163 +8,318 @@ import {
   AiOutlinePicture,
   AiOutlineAudio,
   AiOutlineVideoCamera,
+  AiOutlineDelete,
+  AiOutlineArrowLeft,
+  AiOutlineArrowRight,
+  AiOutlineExclamationCircle,
 } from "react-icons/ai";
 import { useAuth } from "../../context/Authcontext";
+import { useDashboard } from "../../context/DashboardContext";
 import { toast } from "react-toastify";
-import { useDashboard } from "../../context/DashboardContext ";
+import { useNavigate } from "react-router-dom";
 
 export function FilesPage() {
   const { user } = useAuth();
   const { getValue, setValue } = useDashboard();
-  const files = getValue("files");
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const BaseURl = import.meta.env.VITE_BASE_URL;
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(15);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
+  const BackendURL = import.meta.env.VITE_APP_API_URL;
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchFiles = async () => {
-      if (!files && user?.uid) {
-        setLoading(true);
-        try {
-          const res = await fetch(`http://localhost:4000/api/user/${user.uid}`);
-          const data = await res.json();
-          setValue("files", Array.isArray(data) ? data : data.files || []);
-        } catch (err) {
-          toast.error("Error fetching files");
-          console.error("Error fetching files:", err);
-          setValue("files", []);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    fetchFiles();
-  }, [user]);
-
-  const getFileIcon = (type) => {
-    switch (type) {
-      case "image":
-        return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
-      case "image/png":
-        return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
-      case "audio/mpeg":
-        return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
-      case "audio":
-        return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
-      case "video":
-        return <AiOutlineVideoCamera className="h-5 w-5 text-red-400" />;
-      default:
-        return <AiOutlineFile className="h-5 w-5 text-red-400" />;
+  // ---- Fetch files from server with pagination + search ----
+  const fetchFiles = async (page = 1, search = "") => {
+    if (!user?.uid) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${BackendURL}/user/files/${
+          user.uid
+        }?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
+          search
+        )}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch files");
+      const data = await res.json();
+      setFiles(data.files || []);
+      setTotalPages(data.pagination?.totalPages || 1);
+      setValue("files_page_" + page + "_" + search, data.files); // optional caching
+    } catch (err) {
+      console.error(err);
+      toast.error("Error fetching files");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCopy = (link) => {
-    navigator.clipboard.writeText(link);
-    toast.success("Link copied to clipboard!");
+  useEffect(() => {
+    fetchFiles(currentPage, searchTerm);
+  }, [currentPage, searchTerm, user]);
+
+  // ---- Utility helpers ----
+  const getFileIcon = (type) => {
+    if (!type) return <AiOutlineFile className="h-5 w-5 text-red-400" />;
+    if (type.startsWith("image/"))
+      return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
+    if (type.startsWith("audio/"))
+      return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
+    if (type.startsWith("video/"))
+      return <AiOutlineVideoCamera className="h-5 w-5 text-red-400" />;
+    return <AiOutlineFile className="h-5 w-5 text-red-400" />;
   };
 
-  const formatSize = (bytes) => {
-    const b = Number(bytes);
-    if (!b) return "0 B";
+  const formatSize = (b) => {
     const sizes = ["B", "KB", "MB", "GB"];
+    if (!b) return "0 B";
     const i = Math.floor(Math.log(b) / Math.log(1024));
     return `${(b / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  return (
-    <div className="p-8">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3 mb-2">
-              <AiOutlineFile className="h-8 w-8 text-red-400" />
-              My Files
-            </h1>
-            <p className="text-slate-400">Manage all your uploaded files</p>
-          </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-300 transition-colors border border-slate-600">
-            <AiOutlinePlus className="h-4 w-4" />
-            Upload New File
-          </button>
-        </div>
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
-        {/* Search Bar */}
-        <div className="relative">
-          <AiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search your files..."
-            className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-red-400 focus:outline-none transition-colors"
+  const handleCopy = (link) => {
+    navigator.clipboard.writeText(link);
+    toast.success("Link copied!");
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`${BaseURL}/api/files/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error();
+      toast.success("File deleted");
+      setShowConfirm(false);
+      fetchFiles(currentPage, searchTerm); // refresh
+    } catch {
+      toast.error("Failed to delete file");
+    }
+  };
+
+  const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
+
+  // ---- Lazy image with placeholder ----
+  const LazyImage = ({ src, alt }) => {
+    const [loaded, setLoaded] = useState(false);
+    return (
+      <div className="h-32 bg-slate-900 overflow-hidden">
+        {!loaded && (
+          <img
+            src="/placeholder.png"
+            alt="placeholder"
+            className="w-full h-full object-cover animate-pulse"
           />
+        )}
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          onLoad={() => setLoaded(true)}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${
+            loaded ? "opacity-100" : "opacity-0 absolute"
+          }`}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <div className="p-6 md:p-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-2 mb-2">
+            <AiOutlineFile className="h-8 w-8 text-red-400" /> My Files
+          </h1>
+          <p className="text-slate-400">Manage all your uploaded files</p>
         </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500">
+          <AiOutlinePlus className="h-4 w-4" /> Upload New File
+        </button>
       </div>
 
-      {loading ? (
-        <div className="text-center text-slate-400 pt-6">Loading files…</div>
-      ) : (
-        <div className="grid gap-6">
-          {Array.isArray(files) && files.length > 0 ? (
-            files.map((file) => (
-              <div
-                key={file.id}
-                className="bg-slate-900 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-colors"
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-white">
-                        {file.title}
-                      </h3>
-                      <p className="text-slate-400 text-sm mt-1">
-                        {file.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getFileIcon(file.file_type)}
-                      <span className="px-2 py-1 bg-slate-800 text-red-400 rounded text-xs border border-slate-600">
-                        {file.file_type}
-                      </span>
-                    </div>
-                  </div>
+      {/* Search */}
+      <div className="relative mb-6">
+        <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Search your files..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="w-full pl-10 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white focus:border-red-400 focus:outline-none"
+        />
+      </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-slate-400">
-                      <span>{formatSize(file.file_size)}</span>
-                      <span className="flex items-center gap-1">
-                        <AiOutlineEye className="h-3 w-3" />
-                        {file.views} views
-                      </span>
-                    </div>
-                    {/* <div className="flex items-center gap-2">
-                      {file.tags?.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs border border-slate-700"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div> */}
-                    <button
-                      onClick={() => handleCopy(`${BaseURl}/view/${file.id}`)}
-                      className="flex items-center gap-1 px-3 py-1 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded border border-slate-700 hover:border-slate-600 transition-colors text-sm"
-                    >
-                      <AiOutlineCopy className="h-3 w-3" />
-                      Copy Link
-                    </button>
+      {/* Files Grid */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-400"></div>
+        </div>
+      ) : files.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {files.map((file) => (
+            <div
+              key={file.id}
+              className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-all"
+            >
+              {file.file_type?.startsWith("image/") && (
+                <LazyImage src={file.file_url} alt={file.title || "image"} />
+              )}
+
+              <div className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-lg font-bold text-white truncate">
+                    {file.title || "Untitled"}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {getFileIcon(file.file_type)}
+                    <span className="px-2 py-1 bg-slate-700 text-red-300 rounded text-xs">
+                      {file.file_type?.split("/")[1] || "file"}
+                    </span>
                   </div>
                 </div>
+
+                <div className="space-y-1 mb-4 text-sm">
+                  <div className="flex justify-between text-slate-400">
+                    <span>Size</span>{" "}
+                    <span className="text-white">
+                      {formatSize(file.file_size)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Uploaded</span>{" "}
+                    <span className="text-white">
+                      {formatDate(file.created_at)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Expires</span>{" "}
+                    <span className="text-white">
+                      {formatDate(file.expires_at)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span>Views</span>
+                    <span className="text-white flex items-center gap-1">
+                      <AiOutlineEye className="h-3 w-3" /> {file.views}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handlePreview(file.id)}
+                    className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                  >
+                    <AiOutlineEye className="inline h-3 w-3" /> Preview
+                  </button>
+                  <button
+                    onClick={() => handleCopy(`${BaseURL}/view/${file.id}`)}
+                    className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                  >
+                    <AiOutlineCopy className="inline h-3 w-3" /> Copy
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFileToDelete(file);
+                      setShowConfirm(true);
+                    }}
+                    className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded-lg"
+                  >
+                    <AiOutlineDelete className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            ))
-          ) : (
-            <div className="text-center text-slate-400 pt-6">
-              <p className="mb-4">You have no files uploaded yet…</p>
-              <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-300 transition-colors border border-slate-600 mx-auto">
-                <AiOutlinePlus className="h-4 w-4" />
-                Upload Your First File
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center text-slate-400 py-16">
+          <AiOutlineFile className="mx-auto h-10 w-10 mb-4" />
+          No files found {searchTerm && `matching "${searchTerm}"`}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8 gap-1">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="p-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
+          >
+            <AiOutlineArrowLeft />
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+            <button
+              key={n}
+              onClick={() => setCurrentPage(n)}
+              className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                n === currentPage
+                  ? "bg-red-400 text-white"
+                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+              }`}
+            >
+              {n}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-lg bg-slate-700 text-white disabled:opacity-40"
+          >
+            <AiOutlineArrowRight />
+          </button>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg p-6 max-w-md w-full border border-slate-700">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 rounded-full bg-red-400/20">
+                <AiOutlineExclamationCircle className="h-6 w-6 text-red-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Delete File</h3>
+            </div>
+            <p className="text-slate-300 mb-6">
+              Are you sure you want to delete{" "}
+              <span className="font-medium text-white">
+                {fileToDelete?.title}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(fileToDelete.id)}
+                className="px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 flex items-center gap-2"
+              >
+                <AiOutlineDelete /> Delete
               </button>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

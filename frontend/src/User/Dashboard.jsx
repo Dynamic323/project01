@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { Dropzone } from "../Components/Dropzone";
 import { useNavigate } from "react-router-dom";
 import { Upload, User, Code, File, Terminal } from "lucide-react";
+import Recent_files from "../Components/Recent_files";
 function Dashboard() {
   const { logout } = useAuth();
 
@@ -169,46 +170,7 @@ function helloWorld() {
           <Dropzone />
 
           {/* Recent Files */}
-          <div className="mt-8">
-            <h3 className="text-lg font-medium text-slate-100 mb-4 font-mono">
-              Recent Files
-            </h3>
-            <div className="bg-slate-800 border border-slate-600 rounded-lg">
-              <div className="px-4 py-3 border-b border-slate-600">
-                <div className="flex items-center justify-between text-sm text-slate-400 font-mono">
-                  <span>Name</span>
-                  <span>Date</span>
-                </div>
-              </div>
-              <div className="divide-y divide-slate-600">
-                {[
-                  { name: "auth.js", ext: "js", time: "2 hours ago" },
-                  { name: "database.sql", ext: "sql", time: "4 hours ago" },
-                  { name: "config.json", ext: "json", time: "1 day ago" },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="px-4 py-3 hover:bg-slate-700 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Code className="w-4 h-4 text-red-400" />
-                        <span className="text-sm text-slate-300 font-mono">
-                          {item.name}
-                        </span>
-                        <span className="text-xs text-slate-500 bg-slate-700 px-2 py-1 rounded font-mono">
-                          {item.ext}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-500 font-mono">
-                        {item.time}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <Recent_files />
         </div>
       </main>
     </div>

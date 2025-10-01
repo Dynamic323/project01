@@ -9,10 +9,11 @@ import {
   AiOutlineAudio,
   AiOutlinePlus,
 } from "react-icons/ai";
-import { useDashboard } from "../context/DashboardContext ";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/Authcontext";
 import { toast } from "react-toastify";
+import { useDashboard } from "../context/DashboardContext";
+import Loader from "../Components/Loader";
 
 export function HistoryPage() {
   const { getValue, setValue } = useDashboard();
@@ -77,8 +78,9 @@ export function HistoryPage() {
       </div>
 
       {loading ? (
-        <div className="text-center text-slate-400 pt-6">Loading files…</div>
+        <Loader isdashboard={true} text={"Please Wait,  Loading Text...."} />
       ) : (
+        // <div className="text-center text-slate-400 pt-6">Loading files…</div>
         <div className="grid gap-4">
           {Array.isArray(history) && history.length > 0 ? (
             history.map((item) => (

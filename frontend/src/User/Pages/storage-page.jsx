@@ -7,6 +7,8 @@ import {
 } from "react-icons/ai";
 import { useAuth } from "../../context/Authcontext";
 import { toast } from "react-toastify";
+import Loader from "../../Components/Loader";
+import { useDashboard } from "../../context/DashboardContext";
 
 const typeColors = {
   Images: "bg-blue-500",
@@ -25,30 +27,40 @@ function formatMB(mb) {
 export function StoragePage() {
   const { user } = useAuth();
 
-  const [loading, setLoading] = useState(true);
-  const [storageData, setStorageData] = useState(null);
+  const { getValue, setValue } = useDashboard();
 
+  const initialData = getValue("user-storageData");
+  const [loading, setLoading] = useState(!initialData);
+  const storageData = initialData || null;
   useEffect(() => {
     async function fetchStorage() {
-      try {
-        const res = await fetch(
-          `http://localhost:4000/api/storage-info/${user.uid}`
-        );
-        const data = await res.json();
-        console.log(data);
-
-        setStorageData(data);
-      } catch (err) {
-        toast.error("Failed to fetch storage details")
-        console.error("Failed to fetch storage:", err);
-      } finally {
-        setLoading(false);
+      if (!initialData) {
+        try {
+          const res = await fetch(
+            `http://localhost:4000/api/storage-info/${user.uid}`
+          );
+          const data = await res.json();
+          setValue("user-storageData", data);
+          console.log(data);
+        } catch (err) {
+          toast.error("Failed to fetch storage details");
+          console.error("Failed to fetch storage:", err);
+          setValue("user-storageData", {});
+        } finally {
+          setLoading(false);
+        }
       }
     }
     fetchStorage();
-  }, []);
+  }, [user.uid, setValue, initialData]);
 
-  if (loading) return <div className="p-8 text-white">Loading storage…</div>;
+  if (loading)
+    return (
+      <Loader
+        isdashboard={true}
+        text={"Please Wait,  Loading Storage info...."}
+      />
+    );
   if (!storageData)
     return <div className="p-8 text-red-400">Failed to load storage.</div>;
 

@@ -11,13 +11,14 @@ import { HistoryPage } from "./User/HistoryPage";
 import { SettingsPage } from "./User/SettingsPage";
 import { FilesPage } from "./User/Pages/files-page";
 import { StoragePage } from "./User/Pages/storage-page";
-import { DashboardProvider } from "./context/DashboardContext ";
 import Index from "./ViewContent/Index";
+import { DashboardProvider } from "./context/DashboardContext";
+import TextPage from "./User/Pages/text-page";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: <Layout />,  
     children: [
       {
         index: true,
@@ -55,6 +56,10 @@ export const router = createBrowserRouter([
       {
         path: "files",
         element: <FilesPage />,
+      },
+      {
+        path: "texts",
+        element: <TextPage />,
       },
       {
         path: "history",

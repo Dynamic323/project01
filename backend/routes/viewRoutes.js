@@ -1,12 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const { viewUpload } = require("../controllers/viewController");
+const {
+  viewUpload,
+  getUserFiles,
+  getUserTexts,
+  getUserAll,
+} = require("../controllers/viewController");
 
+// Single file view
 router.get("/view/:id", viewUpload);
 
-// Route to get all uploads for a particular user
-const { getUserUploads } = require("../controllers/viewController");
-router.get("/user/:userId", getUserUploads);
+// Added Pagination
+router.get("/user/files/:userId", getUserFiles);
+router.get("/user/text/:userId", getUserTexts);
+router.get("/user/all/:userId", getUserAll);
 
-// Export the router
 module.exports = router;

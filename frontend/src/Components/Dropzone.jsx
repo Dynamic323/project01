@@ -11,31 +11,34 @@ import {
   AiOutlineEdit,
 } from "react-icons/ai";
 import { toast } from "react-toastify";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useUploader from "../hooks/useUploader";
 import Spinner from "./Spinner";
-import { Code, Notebook } from "lucide-react";
+import { Code, StepBack } from "lucide-react";
+import UploadSuccessModal from "./UploadSuccessModal ";
 
-// Mock user plan status (replace with actual logic)
-const isFreePlan = true;
+const isFreePlan = false;
+const FREE_PLAN_MAX_SIZE_MB = 50;
 
 export function Dropzone() {
+  // State variables
   const [uploadType, setUploadType] = useState("files");
   const [isDragOver, setIsDragOver] = useState(false);
   const [files, setFiles] = useState([]);
   const [textContent, setTextContent] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [Showmodal, setShowmodal] = useState(false);
   const [expiresAt, setExpiresAt] = useState("");
   const [dayName, setDayName] = useState("");
   const [contentType, setContentType] = useState("text");
   const [isPublic, setIsPublic] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [uploadData, setUploadData] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contentTitle, setContentTitle] = useState("");
   const [fileNames, setFileNames] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
+  const [abortController, setAbortController] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const { uploading, error, success, uploadFile } = useUploader("/upload");
 
   // Block navigation if there are unsaved changes
@@ -66,7 +69,28 @@ export function Dropzone() {
     }
   };
 
-  // File handling functions
+  // Calculate total file size
+  const calculateTotalSize = (fileList) => {
+    return fileList.reduce((total, file) => total + file.size, 0);
+  };
+
+  // Check if files exceed free plan limit
+  const checkFileSizeLimit = (fileList) => {
+    const totalSizeMB = calculateTotalSize(fileList) / (1024 * 1024);
+    return totalSizeMB <= FREE_PLAN_MAX_SIZE_MB;
+  };
+
+  // Validate files
+  const validateFiles = (fileList) => {
+    if (isFreePlan && !checkFileSizeLimit(fileList)) {
+      toast.error(
+        `Free plan limit exceeded. Maximum allowed size is ${FREE_PLAN_MAX_SIZE_MB}MB.`
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -77,23 +101,30 @@ export function Dropzone() {
     setIsDragOver(false);
   };
 
-  const handleFileSelect = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const uniqueFiles = selectedFiles.filter(
-      (newFile) =>
-        !files.some((existingFile) => existingFile.name === newFile.name)
-    );
-    const updatedFiles = [...files, ...uniqueFiles];
-    setFiles(updatedFiles);
-    setFileNames([...fileNames, ...uniqueFiles.map((file) => file.name)]);
-    setHasUnsavedChanges(true);
-  };
-
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
+    const allFiles = [...files, ...droppedFiles];
+    if (!validateFiles(allFiles)) {
+      return;
+    }
     const uniqueFiles = droppedFiles.filter(
+      (newFile) =>
+        !files.some((existingFile) => existingFile.name === newFile.name)
+    );
+    setFiles([...files, ...uniqueFiles]);
+    setFileNames([...fileNames, ...uniqueFiles.map((file) => file.name)]);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleFileSelect = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    const allFiles = [...files, ...selectedFiles];
+    if (!validateFiles(allFiles)) {
+      return;
+    }
+    const uniqueFiles = selectedFiles.filter(
       (newFile) =>
         !files.some((existingFile) => existingFile.name === newFile.name)
     );
@@ -147,6 +178,10 @@ export function Dropzone() {
     setContentTitle("");
     setFileNames([]);
     setHasUnsavedChanges(false);
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+    }
   };
 
   const handleProceed = () => {
@@ -154,8 +189,16 @@ export function Dropzone() {
       toast.error("Please enter some text or select files to upload.");
       return;
     }
-    setShowModal(true);
+    setShowmodal(true);
     setFileNames(files.map((file) => file.name));
+  };
+
+  const handleCancelSubmit = () => {
+    if (abortController) {
+      abortController.abort();
+    }
+    setIsSubmitting(false);
+    setAbortController(null);
   };
 
   const handleSubmit = async (e) => {
@@ -172,49 +215,58 @@ export function Dropzone() {
       return;
     }
     try {
+      const controller = new AbortController();
+      setAbortController(controller);
       let response = null;
-      if (files.length > 0) {
-        response = await uploadFile({
-          files,
-          fileNames,
-          type: "file",
-          expiresAt,
-          isPublic,
-          user_id: JSON.parse(localStorage.getItem("user")).uid,
-        });
+      if (files.length != 0) {
+        response = await uploadFile(
+          {
+            files: files,
+            fileName: fileNames,
+            type: "file",
+            expiresAt,
+            isPublic,
+            user_id: JSON.parse(localStorage.getItem("user")).uid,
+          },
+          { signal: controller.signal }
+        );
       } else {
-        if (contentTitle == "") {
-          toast.error(`Pls enter a title for your ${contentType} `);
-          return;
-        }
-
-        response = await uploadFile({
-          textContent,
-          contentTitle,
-          type: contentType,
-          expiresAt,
-          isPublic,
-          user_id: JSON.parse(localStorage.getItem("user")).uid,
-        });
+        response = await uploadFile(
+          {
+            textContent,
+            textTitle: contentTitle,
+            type: contentType,
+            expiresAt,
+            isPublic,
+            user_id: JSON.parse(localStorage.getItem("user")).uid,
+          },
+          { signal: controller.signal }
+        );
       }
-      toast.success("Upload successful! Link generated.");
-      setIsSubmitting(false);
+
+      console.log(response);
+
+      toast.success("Upload successful! Link generated.", 2000);
       setHasUnsavedChanges(false);
-      setTimeout(() => {
-        safeNavigate(`/files/${response.data.data.id}`);
-      }, 4000);
-    } catch (error) {
-      console.error(error);
-      const message =
-        error?.response?.data?.error ||
-        error?.message ||
-        "Upload failed. Please try again.";
-      toast.error(message);
+      resetForm();
       setIsSubmitting(false);
+      setShowmodal(false);
+
+      // Show the success modal
+      const data = Array.isArray(response.data)
+        ? response.data
+        : [response.data];
+      setUploadData(data);
+      setShowSuccessModal(true);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        toast.error(error?.message || "Upload failed. Please try again.");
+      }
+      setIsSubmitting(false);
+      setAbortController(null);
     }
   };
 
-  // Set expiry date on component mount
   useEffect(() => {
     const now = new Date();
     const expiresDate = new Date(now.setDate(now.getDate() + 2));
@@ -225,62 +277,16 @@ export function Dropzone() {
     setDayName(dayOfWeek);
   }, []);
 
-  // File list component
-  const FileList = () => (
-    <div className="border border-slate-700 rounded-xl bg-slate-900 overflow-hidden">
-      <div className="border-b border-slate-700 bg-slate-800 px-6 py-4">
-        <h4 className="font-bold text-white flex items-center gap-2">
-          <AiOutlineFile className="text-red-400" />
-          Selected Files ({files.length})
-        </h4>
-      </div>
-      <div className="p-6 space-y-3 max-h-64 overflow-y-auto">
-        {files.map((file, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              {getFileIcon(file.name)}
-              <div>
-                <div className="text-white font-medium">{file.name}</div>
-                <div className="text-sm text-slate-400">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleFilenameEdit(index)}
-                className="p-2 text-slate-400 hover:text-blue-400 transition-colors"
-                title="Edit filename"
-              >
-                <AiOutlineEdit />
-              </button>
-              <button
-                onClick={() => removeFile(index)}
-                className="p-2 text-slate-400 hover:text-red-400 transition-colors"
-                title="Remove file"
-              >
-                <AiOutlineDelete />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  if (showModal) {
+  if (Showmodal) {
     return (
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-3xl mx-auto p-6 space-y-6">
         <button
-          className="underline text-red-400 px-4 py-2 mb-6"
-          onClick={() => setShowModal(false)}
+          className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors"
+          onClick={() => setShowmodal(false)}
         >
-          Back
+          <StepBack /> Back
         </button>
-        <div className="bg-slate-800 rounded-xl p-6 shadow-xl">
+        <div className="bg-slate-800 rounded-xl p-6 shadow-xl border border-slate-700">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title Section */}
             <div>
@@ -290,27 +296,43 @@ export function Dropzone() {
                   : "Save as (Title)"}
               </label>
               {uploadType === "files" ? (
-                <div className="space-y-3 max-h-40 overflow-y-auto pr-2">
+                <div className="space-y-3 max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800 hover:scrollbar-thumb-slate-500">
                   {files.map((file, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      {getFileIcon(file.name)}
-                      <span className="text-white">{file.name}</span>
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-slate-700 rounded-lg"
+                    >
+                      <div className="flex items-center gap-2">
+                        {getFileIcon(file.name)}
+                        <span className="text-white">{file.name}</span>
+                      </div>
+                      {!isFreePlan && (
+                        <button
+                          onClick={() => handleFilenameEdit(index)}
+                          type="button"
+                          className="p-1 text-slate-400 hover:text-blue-400 transition-colors"
+                          title="Edit filename"
+                        >
+                          <AiOutlineEdit />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
               ) : (
                 <input
-                  className="w-full text-xl p-2 bg-slate-900 text-white border-b-2 border-slate-600 focus:border-red-400 outline-none rounded"
+                  className="w-full text-xl p-3 bg-slate-900 text-white border border-slate-700 focus:border-red-400 outline-none rounded-lg transition-colors"
                   type="text"
                   value={contentTitle}
                   onChange={(e) => setContentTitle(e.target.value)}
                   placeholder="Enter a title"
+                  required
                 />
               )}
             </div>
 
             {/* Expiry Section */}
-            <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-700">
               <p className="text-white">
                 Will expire:{" "}
                 <span className="font-bold text-red-400">
@@ -319,11 +341,13 @@ export function Dropzone() {
               </p>
               <button
                 type="button"
-                className="text-sm text-red-400 border border-red-400 px-3 py-1 rounded hover:bg-red-400 hover:text-white transition"
+                className="text-sm text-red-400 border border-red-400 px-3 py-1 rounded-lg hover:bg-red-400 hover:text-white transition-colors"
                 onClick={() => {
-                  isFreePlan
-                    ? toast.error("Upgrade your Account to use this feature !")
-                    : toast.info("Expiry change feature coming soon!");
+                  if (isFreePlan) {
+                    toast.error("Upgrade your Account to use this feature!");
+                  } else {
+                    toast.info("Expiry change feature coming soon!");
+                  }
                 }}
               >
                 Change Expiry
@@ -331,14 +355,14 @@ export function Dropzone() {
             </div>
 
             {/* Visibility Section */}
-            <div className="flex items-center gap-4 p-4 bg-slate-900 rounded-lg">
+            <div className="flex items-center gap-4 p-4 bg-slate-900 rounded-lg border border-slate-700">
               <span className="text-white">Visibility:</span>
               <div className="flex gap-2">
                 <button
                   type="button"
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     isPublic
-                      ? "bg-red-400 text-white"
+                      ? "bg-red-400 text-white shadow-md"
                       : "bg-slate-700 text-slate-300 hover:bg-slate-600"
                   }`}
                   onClick={() => setIsPublic(true)}
@@ -349,7 +373,7 @@ export function Dropzone() {
                   type="button"
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     !isPublic
-                      ? "bg-red-400 text-white"
+                      ? "bg-red-400 text-white shadow-md"
                       : "bg-slate-700 text-slate-300 hover:bg-slate-600"
                   }`}
                   onClick={() => setIsPublic(false)}
@@ -361,10 +385,10 @@ export function Dropzone() {
 
             {/* Content Type Section */}
             {uploadType !== "files" && (
-              <div className="p-4 bg-slate-900 rounded-lg">
+              <div className="p-4 bg-slate-900 rounded-lg border border-slate-700">
                 <label className="block text-white mb-2">Type:</label>
                 <select
-                  className="w-full bg-slate-800 p-2 rounded border border-slate-700 focus:border-red-400 outline-none"
+                  className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 focus:border-red-400 outline-none transition-colors"
                   value={contentType}
                   onChange={(e) => setContentType(e.target.value)}
                 >
@@ -374,15 +398,15 @@ export function Dropzone() {
               </div>
             )}
 
-            {/* Submit Button */}
-            <div className="flex justify-end">
+            {/* Submit and Cancel Buttons */}
+            <div className="flex justify-end gap-4">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                // disabled={isSubmitting}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all ${
                   isSubmitting
                     ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                    : "bg-red-400 text-white hover:bg-red-500"
+                    : "bg-red-400 text-white hover:bg-red-500 shadow-md hover:shadow-red-400/30"
                 }`}
               >
                 {isSubmitting ? (
@@ -397,6 +421,16 @@ export function Dropzone() {
                   </>
                 )}
               </button>
+              {isSubmitting && (
+                <button
+                  type="button"
+                  onClick={handleCancelSubmit}
+                  className="flex items-center gap-2 px-6 py-3 bg-transparent text-red-400 border border-red-400 rounded-lg hover:bg-red-400/10 transition-colors"
+                >
+                  <AiOutlineDelete />
+                  Cancel
+                </button>
+              )}
             </div>
           </form>
         </div>
@@ -405,17 +439,17 @@ export function Dropzone() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-6">
-      {/* Upload Type Toggle */}
+    <div className="w-full max-w-5xl mx-auto p-6 space-y-8">
+      {/* Toggle Buttons */}
       <div className="flex gap-3 mb-8">
         <button
           onClick={() => {
             setUploadType("files");
             resetForm();
           }}
-          className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all ${
+          className={`flex items-center gap-3 px-6 py-3 rounded-lg border-2 transition-all ${
             uploadType === "files"
-              ? "border-red-400 bg-slate-800 text-red-400"
+              ? "border-red-400 bg-slate-800 text-red-400 shadow-md"
               : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
           }`}
         >
@@ -427,9 +461,9 @@ export function Dropzone() {
             setUploadType("text");
             resetForm();
           }}
-          className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all ${
+          className={`flex items-center gap-3 px-6 py-3 rounded-lg border-2 transition-all ${
             uploadType === "text"
-              ? "border-red-400 bg-slate-800 text-red-400"
+              ? "border-red-400 bg-slate-800 text-red-400 shadow-md"
               : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
           }`}
         >
@@ -438,7 +472,6 @@ export function Dropzone() {
         </button>
       </div>
 
-      {/* File Upload Section */}
       {uploadType === "files" ? (
         <div className="space-y-6">
           <div
@@ -464,13 +497,18 @@ export function Dropzone() {
                   Drop your files here
                 </p>
                 <p className="text-slate-400">or click to browse</p>
+                {isFreePlan && (
+                  <p className="text-yellow-400 text-sm mt-2">
+                    Free plan limit: {FREE_PLAN_MAX_SIZE_MB}MB max
+                  </p>
+                )}
               </div>
               <div className="flex flex-wrap gap-2 justify-center">
                 {["Images", "Documents", "Audio", "Video", "Archives"].map(
                   (type) => (
                     <span
                       key={type}
-                      className="px-3 py-1 bg-slate-800 text-red-400 rounded-full text-xs border border-slate-700"
+                      className="px-4 py-2 bg-slate-800 text-red-400 rounded-full text-xs border border-slate-700"
                     >
                       {type}
                     </span>
@@ -479,10 +517,63 @@ export function Dropzone() {
               </div>
             </div>
           </div>
-          {files.length > 0 && <FileList />}
+
+          {files.length > 0 && (
+            <div className="border border-slate-700 rounded-xl bg-slate-900 overflow-hidden">
+              <div className="border-b border-slate-700 bg-slate-800 px-6 py-4">
+                <h4 className="font-bold text-white flex items-center gap-2">
+                  <AiOutlineFile className="text-red-400" />
+                  Selected Files ({files.length})
+                  <span className="text-xs text-yellow-400 ml-2">
+                    (Max 50MB for free plan)
+                  </span>
+                </h4>
+              </div>
+              <div className="p-6 space-y-3">
+                {files.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {getFileIcon(file.name)}
+                      <div>
+                        <div className="text-white font-medium">
+                          {file.name}
+                        </div>
+                        <div className="text-sm text-slate-400">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleFilenameEdit(index)}
+                        className="p-2 text-slate-400 hover:text-blue-400 transition-colors"
+                        title="Edit filename"
+                      >
+                        <AiOutlineEdit />
+                      </button>
+                      <button
+                        onClick={() => removeFile(index)}
+                        className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                        title="Remove file"
+                      >
+                        <AiOutlineDelete />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div className="text-xs text-yellow-400 mt-2">
+                  Total size:{" "}
+                  {(calculateTotalSize(files) / (1024 * 1024)).toFixed(2)} MB
+                  /50MB
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        // Text Upload Section
         <div className="border border-slate-700 rounded-xl overflow-hidden bg-slate-900">
           <div className="border-b border-slate-700 bg-slate-800 px-6 py-4">
             <h3 className="font-bold text-white flex items-center gap-2">
@@ -497,12 +588,7 @@ export function Dropzone() {
                 setTextContent(e.target.value);
                 setHasUnsavedChanges(true);
               }}
-              placeholder="Type or paste your text here...
-You can share:
-• Notes and reminders
-• Code snippets
-• Messages
-• Any text content"
+              placeholder="Type or paste your text here..."
               className="w-full h-80 p-6 bg-slate-900 text-white text-sm resize-none border-0 focus:outline-none focus:ring-2 focus:ring-red-400 placeholder-slate-500 leading-relaxed"
             />
             <div className="absolute bottom-4 right-4 text-xs text-slate-500">
@@ -512,7 +598,7 @@ You can share:
         </div>
       )}
 
-      {/* Proceed Button */}
+      {/* Share Button */}
       <div className="mt-8 flex justify-center">
         <button
           onClick={handleProceed}
@@ -522,6 +608,13 @@ You can share:
           Proceed
         </button>
       </div>
+
+      {showSuccessModal && (
+        <UploadSuccessModal
+          data={uploadData}
+          onClose={() => setShowSuccessModal(false)}
+        />
+      )}
     </div>
   );
 }

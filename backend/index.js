@@ -5,6 +5,7 @@ const app = express();
 const uploadRoutes = require("./routes/uploadRoutes");
 const userHistory = require("./routes/userHistory");
 const viewRoutes = require("./routes/viewRoutes");
+const deleteRoutes = require("./routes/deleteRoutes");
 const userStorageInfo = require("./routes/userStorageInfo");
 const cors = require("cors");
 
@@ -13,14 +14,15 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    // origin: "http://localhost:5173",
-    origin: "http://localhost:5174",
+    origin: "http://localhost:5173",
+    // origin: "http://localhost:5174",
     credentials: true,
   })
 );
 
 app.use("/api", uploadRoutes);
 app.use("/api", viewRoutes);
+app.use("/api", deleteRoutes);
 app.use("/api", userHistory);
 app.use("/api", userStorageInfo);
 
