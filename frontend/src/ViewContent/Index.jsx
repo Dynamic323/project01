@@ -8,11 +8,15 @@ import { ErrorDisplay } from "./ErrorDisplay";
 import Loader from "../Components/Loader";
 import { VideoPlayer } from "./VideoPlayer";
 import { AudioPlayer } from "./AudioPlayer";
-import { FiDownload, FiShare2, FiUserPlus } from "react-icons/fi";
+import { FiShare2, FiUserPlus } from "react-icons/fi";
 import { formatSize, getActualFileIcon } from "../utils/file-helper";
 import Navbar from "../Components/Navbar";
 import FileSkeletonLoader from "../Components/FileSkeletonLoader";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+
+// Lucide icons
+import { Clipboard, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { TextDownload } from "./TextDownload";
 
 export default function Index() {
   const { id } = useParams();
@@ -21,7 +25,12 @@ export default function Index() {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [fileType, setFileType] = useState("file"); // Initialize with a default value
+  const [fileType, setFileType] = useState("file");
+
+  // copy + expand state
+  const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const MAX_PREVIEW = 200;
 
   useEffect(() => {
     const query = searchParams.get("type");
@@ -41,9 +50,7 @@ export default function Index() {
         const response = await api.get(`/view/${id}/?type=${qry}`);
         if (response.data) {
           setContent(response.data);
-          console.log(response.data);
-          
-          setFileType(response.data.type || "file"); // Ensure fileType is set
+          setFileType(response.data.type || "file");
         } else {
           toast.error("Error in fetching Files");
         }
@@ -56,38 +63,45 @@ export default function Index() {
     fetchContent();
   }, [id, qry]);
 
-  const renderContent = () => {
-    if (loading) {
-      return <FileSkeletonLoader fileType={fileType} />;
+  const handleCopy = async () => {
+    if (!content?.content) return;
+    try {
+      await navigator.clipboard.writeText(content.content);
+      setCopied(true);
+      toast.success("Copied to clipboard ");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+      toast.error("Copy failed");
     }
+  };
+
+  const renderContent = () => {
+    if (loading) return <FileSkeletonLoader fileType={fileType} />;
     if (error) return <ErrorDisplay message={error} />;
     if (!content) return <ErrorDisplay message="No content found" />;
 
     return (
       <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
         <div className="p-6">
+          {/* Header */}
           <div className="flex items-center mb-6">
             <div className="p-3 rounded-full bg-slate-700 mr-4">
               {getActualFileIcon(content.type)}
             </div>
             <div>
-              <div className="">
-                <h2 className="text-2xl font-bold flex justify-between text-white w-fit ">
-                  <span>{content.title || "Untitled"} </span>
-                </h2>
-                <span>
-                  size:
-                  <span className="text-red-400">
-                    {formatSize(content.size)}
-                  </span>
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-white">
+                {content.title || "Untitled"}
+              </h2>
+              <span className="text-red-400">size: {content.size}</span>
               <p className="text-slate-400 text-sm mt-1">
-                {content.type} • {formatSize(content.size)} •
+                {content.type} • {formatSize(content.size)} •{" "}
                 {new Date(content.createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>
+
+          {/* File Preview */}
           <div className="mb-6">
             {content.type === "image" && (
               <ImageViewer src={content.file_url} alt={content.name} />
@@ -101,27 +115,82 @@ export default function Index() {
             {content.type === "video" && (
               <VideoPlayer src={content.file_url} title={content.name} />
             )}
-            {(content.type === "text" || content.type === "code") && (
-              <div className="bg-slate-700 p-4 rounded-lg">
-                <pre className="text-slate-200 whitespace-pre-wrap">
-                  {content.content}
-                </pre>
-              </div>
-            )}
+            {(content.type === "text" || content.type === "code") &&
+              content.content && (
+                <div className="relative bg-slate-700 p-4 rounded-lg">
+                  {/* Copy Button */}
+                  <button
+                    onClick={handleCopy}
+                    className="absolute top-2 right-2 flex items-center gap-1 bg-red-400 hover:bg-red-500 text-white text-sm font-medium px-3 py-1 rounded shadow"
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={16} />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Clipboard size={16} />
+                        Copy
+                      </>
+                    )}
+                  </button>
+
+                  {/* Text Content */}
+                  <pre className="text-slate-200 whitespace-pre-wrap">
+                    {expanded || content.content.length <= MAX_PREVIEW
+                      ? content.content
+                      : content.content.slice(0, MAX_PREVIEW) + " ..."}
+                  </pre>
+
+                  {/* Expand/Collapse Toggle */}
+                  {content.content.length > MAX_PREVIEW && (
+                    <button
+                      onClick={() => setExpanded(!expanded)}
+                      className="mt-2 flex cursor-pointer items-center gap-1 text-red-400 hover:text-red-300 text-sm"
+                    >
+                      {expanded ? (
+                        <>
+                          Show Less <ChevronUp size={14} />
+                        </>
+                      ) : (
+                        <>
+                          <span className="flex">
+                            Show More <ChevronDown size={14} />
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
           </div>
+
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
-            <FileDownload
-              url={content.file_url}
-              fileName={content.name}
-              className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center"
-            />
+            {content.type === "text" || content.type === "code" ? (
+              <TextDownload
+                content={content.content}
+                fileName={content.title}
+                className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center"
+              />
+            ) : (
+              <FileDownload
+                url={content.file_url}
+                fileName={content.name}
+                className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center"
+              />
+            )}
+
             <button className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
               <FiShare2 className="mr-2" /> Share
             </button>
           </div>
+
+          {/* Views */}
           <div className="bg-slate-700 p-4 rounded-lg">
             <p className="text-slate-300 text-sm">
-              This file has been viewed <strong>{content.views || 0}</strong>
+              This file has been viewed <strong>{content.views || 0}</strong>{" "}
               times.
             </p>
           </div>
@@ -131,27 +200,16 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900  px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-900 px-4 sm:px-6 lg:px-8">
       <Navbar />
+      <ToastContainer />
       <div className="py-12">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            {/* <h1 className="text-4xl font-bold text-white mb-4">
-            Welcome to Our File Sharing Platform
-          </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Upload, share, and manage your files effortlessly. Join thousands of
-            users who trust us with their content.
-          </p> */}
-            {/* <Link
-            to="/signup"
-            className="mt-6 inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
-          >
-            <FiUserPlus className="mr-2" /> Create Your Free Account
-          </Link> */}
-          </div>
           <div className="mb-12">
-            <h1 className="text-3xl font-bold text-white mb-6">File Preview</h1>
+            <h1 className="text-3xl font-bold text-white mb-6">
+              {" "}
+              Preview Page
+            </h1>
             {renderContent()}
           </div>
 
@@ -172,7 +230,6 @@ export default function Index() {
           </div>
         </div>
       </div>
-
       <footer />
     </div>
   );

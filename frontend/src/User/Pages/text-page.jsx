@@ -236,14 +236,22 @@ export default function TextPage() {
               <div className="text-slate-300 text-sm mb-4">
                 {txt.type === "code" ? (
                   <SyntaxHighlighter
-                    // language="javascript"
-                    // style={theme}
-                    className="rounded-md p-2 bg-slate-900"
+                    language="javascript"
+                    style={theme}
+                    customStyle={{
+                      backgroundColor: "#2d3748",
+                      padding: "1rem",
+                      borderRadius: "0.5rem",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 6,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
                   >
-                    {txt.content || "No content"}
+                    {txt.content}
                   </SyntaxHighlighter>
                 ) : (
-                  <p className="line-clamp-3">{txt.content || "No content"}</p>
+                  <p className="line-clamp-6">{txt.content || "No content"}</p>
                 )}
               </div>
               <div className="flex items-center justify-between text-sm mb-4">

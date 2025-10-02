@@ -102,7 +102,7 @@ exports.userStorageInfoController = async (req, res) => {
 
     // Build text object with defaults
     const textTypes = {
-      text: { count: 0, amountUsed: 0 }, // amountUsed in MB
+      text: { count: 0, amountUsed: 0 }, 
       code: { count: 0, amountUsed: 0 },
     };
 

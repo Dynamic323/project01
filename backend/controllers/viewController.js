@@ -1,6 +1,11 @@
 const pool = require("../config/db");
 const path = require("path");
 const fs = require("fs");
+function ReadableBytes(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+  else return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
 // ---------- Single File View ----------
 exports.viewUpload = async (req, res) => {
   const { id } = req.params;
@@ -98,6 +103,7 @@ exports.viewUpload = async (req, res) => {
           originalType: "text",
           content: text.content,
           createdAt: text.created_at,
+          size: ReadableBytes(Buffer.byteLength(text.content, "utf-8")),
           views: text.views,
           isPublic: text.is_public,
         });

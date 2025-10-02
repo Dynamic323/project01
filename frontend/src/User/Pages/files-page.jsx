@@ -134,7 +134,7 @@ export function FilesPage() {
           {files.map((file) => (
             <div
               key={file.id}
-              className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-all"
+              className="bg-slate-800  border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-all"
             >
               {file.file_type?.startsWith("image/") && (
                 <LazyImage src={file.file_url} alt={file.title || "image"} />
