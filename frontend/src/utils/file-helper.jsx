@@ -60,3 +60,9 @@ export const getActualFileIcon = (type) => {
       return <FiFile className="text-slate-400" />;
   }
 };
+
+
+
+export   const BackendURL = import.meta.env.VITE_BACKEND_URL;
+ export  const FrontendURL = import.meta.env.VITE_FRONTEND_URL
+

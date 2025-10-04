@@ -14,6 +14,7 @@ import { useAuth } from "../context/Authcontext";
 import { toast } from "react-toastify";
 import { useDashboard } from "../context/DashboardContext";
 import Loader, { Subloader } from "../Components/Loader";
+import { BackendURL } from "../utils/file-helper";
 
 export function HistoryPage() {
   const { getValue, setValue } = useDashboard();
@@ -21,13 +22,14 @@ export function HistoryPage() {
   const { user } = useAuth();
   const history = getValue("user-history");
 
+
   useEffect(() => {
     async function fetchHistory() {
       if (!history) {
         setloading(true);
         try {
           const res = await fetch(
-            `http://localhost:4000/api/user-history/${user.uid}`
+            `${BackendURL}/api/user-history/${user.uid}`
           );
           const data = await res.json();
           setValue(

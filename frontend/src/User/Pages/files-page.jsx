@@ -16,6 +16,8 @@ import { useDashboard } from "../../context/DashboardContext";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  BackendURL,
+  FrontendURL,
   formatDate,
   formatSize,
   getFileIcon,
@@ -36,8 +38,6 @@ export function FilesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [showConfirm, setShowConfirm] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
-  const BackendURL = import.meta.env.VITE_BACKEND_URL;
-  const FrontendURL = import.meta.env.VITE_FRONTEND_URL
 
   const navigate = useNavigate();
 
@@ -55,7 +55,7 @@ export function FilesPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `${BackendURL}/user/files/${
+        `${BackendURL}api/user/files/${
           user.uid
         }?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
           search
