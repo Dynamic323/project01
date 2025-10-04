@@ -9,6 +9,7 @@ import { useAuth } from "../../context/Authcontext";
 import { toast } from "react-toastify";
 import Loader, { Subloader } from "../../Components/Loader";
 import { useDashboard } from "../../context/DashboardContext";
+import { BackendURL } from "../../utils/file-helper";
 
 const typeColors = {
   Images: "bg-blue-500",
@@ -37,7 +38,7 @@ export function StoragePage() {
       if (!initialData) {
         try {
           const res = await fetch(
-            `http://localhost:4000/api/storage-info/${user.uid}`
+            `${BackendURL}/api/storage-info/${user.uid}`
           );
           const data = await res.json();
           setValue("user-storageData", data);
