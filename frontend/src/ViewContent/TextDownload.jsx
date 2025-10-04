@@ -9,13 +9,14 @@ export function TextDownload({ content, fileName, className }) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = (fileName || "untitled") + ".txt";
+    a.download = (`DyshareX_${fileName}` || "DyshareX_untitled") + ".txt";
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
   return (
-    <button
+    <button 
+
       onClick={handleDownload}
       className={`flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition ${className}`}
     >

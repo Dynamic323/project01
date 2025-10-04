@@ -16,8 +16,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Loader, { Subloader } from "../../Components/Loader";
+import {BackendURL} from "../../utils/file-helper"
 export default function TextPage() {
-  const { user } = useAuth();
   const { getValue, setValue } = useDashboard();
   const [loading, setLoading] = useState(false);
   const [texts, setTexts] = useState([]);
@@ -27,16 +27,21 @@ export default function TextPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [textToDelete, setTextToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const BaseURL = import.meta.env.VITE_APP_API_URL;
   const navigate = useNavigate();
-
+  
   // Memoized data fetching
+  // Text-page.jsx
+  const { user } = useAuth();
+  const cachedText = getValue("texts")
+
   const fetchTexts = useCallback(async () => {
-    if (!getValue("texts") && user?.uid) {
-      setLoading(true);
-      try {
+   
+    if (!cachedText) {
+      setLoading(true)
+
+       try {
         const res = await fetch(
-          `${BaseURL}/user/text/${user.authUser.uid}?page=1&limit=${itemsPerPage}&search=`
+          `${BackendURL}/api/user/text/${user.authUser.uid}?page=1&limit=${itemsPerPage}&search=`
         );
         const data = await res.json();
 
@@ -51,10 +56,9 @@ export default function TextPage() {
       } finally {
         setLoading(false);
       }
-    } else {
-      setTexts(getValue("texts") || []);
+
     }
-  }, [user, BaseURL, getValue, setValue, itemsPerPage]);
+  }, [user, BackendURL, getValue, setValue, itemsPerPage]);
 
   useEffect(() => {
     fetchTexts();
@@ -80,7 +84,7 @@ export default function TextPage() {
   const currentTexts = filteredTexts.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredTexts.length / itemsPerPage);
 
-  const formatDate = (dateString) =>
+  const formatDate = (dateString) =>    
     new Date(dateString).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -95,7 +99,7 @@ export default function TextPage() {
   const handleDelete = async (id) => {
     setIsDeleting(true);
     try {
-      const res = await fetch(`${BaseURL}/api/text/${id}`, {
+      const res = await fetch(`${BackendURL}/api/text/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {

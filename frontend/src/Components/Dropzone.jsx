@@ -47,7 +47,7 @@ export function Dropzone() {
   const [abortController, setAbortController] = useState(null);
 
   const navigate = useNavigate();
-  const { uploading, error, success, uploadFile } = useUploader("/upload");
+  const { uploading, error, success, uploadFile } = useUploader("/api/upload");
 
   // Block navigation if there are unsaved changes
   useEffect(() => { 

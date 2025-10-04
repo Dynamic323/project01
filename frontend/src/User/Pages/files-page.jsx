@@ -5,9 +5,6 @@ import {
   AiOutlineSearch,
   AiOutlineEye,
   AiOutlineCopy,
-  AiOutlinePicture,
-  AiOutlineAudio,
-  AiOutlineVideoCamera,
   AiOutlineDelete,
   AiOutlineExclamationCircle,
 } from "react-icons/ai";
@@ -42,27 +39,24 @@ export function FilesPage() {
   const navigate = useNavigate();
 
   const fetchFiles = async (page = 1, search = "") => {
-    if (!user?.uid) return;
+    
+    if (!user?.authUser.uid) return;
 
     const cachedFiles = getValue("files");
 
-    // Use cached files if available and no search term
-    if (cachedFiles && !search && page === 1) {
-      setFiles(cachedFiles);
-      return;
-    }
+   
 
-    setLoading(true);
+    if (!cachedFiles) {
+        setLoading(true);
     try {
       const res = await fetch(
-        `${BackendURL}api/user/files/${
+        `${BackendURL}/api/user/files/${
           user.authUser.uid
         }?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
           search
         )}`
       );
 
-      console.log(res);
       
       if (!res.ok) throw new Error("Failed to fetch files");
       const data = await res.json();
@@ -77,11 +71,12 @@ export function FilesPage() {
     } finally {
       setLoading(false);
     }
+    }
+
   };
 
   useEffect(() => {
     fetchFiles(currentPage, searchTerm);
-    // console.log("Working");
     
   }, [currentPage, searchTerm, user]);
 

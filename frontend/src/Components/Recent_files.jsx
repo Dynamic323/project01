@@ -23,7 +23,7 @@ function Recent_files() {
 
         try {
           const res = await fetch(
-            `${BackendURL}api/user/all/${user.authUser.uid}`
+            `${BackendURL}/api/user/all/${user.authUser.uid}`
           );
           const response = await res.json();
 
@@ -103,7 +103,7 @@ function Recent_files() {
             </div>
           </div>
           {loading ? (
-            "Loading"
+           <h1 className="p-3"> Loading</h1>
           ) : (
             <div className="divide-y divide-slate-600">
               {history.map((item, index) => (
