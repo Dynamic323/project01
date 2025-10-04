@@ -8,6 +8,7 @@ import {
   AiOutlinePicture,
 } from "react-icons/ai";
 import { Code, Text } from "lucide-react";
+import { BackendURL } from "../utils/file-helper";
 
 function Recent_files() {
   const { getValue, setValue } = useDashboard();
@@ -22,7 +23,7 @@ function Recent_files() {
 
         try {
           const res = await fetch(
-            `http://localhost:4000/api/user/all/${user.uid}`
+            `${BackendURL}api/user/all/${user.authUser.uid}`
           );
           const response = await res.json();
 

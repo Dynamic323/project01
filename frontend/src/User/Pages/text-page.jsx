@@ -36,7 +36,7 @@ export default function TextPage() {
       setLoading(true);
       try {
         const res = await fetch(
-          `${BaseURL}/user/text/${user.uid}?page=1&limit=${itemsPerPage}&search=`
+          `${BaseURL}/user/text/${user.authUser.uid}?page=1&limit=${itemsPerPage}&search=`
         );
         const data = await res.json();
 

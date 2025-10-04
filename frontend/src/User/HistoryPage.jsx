@@ -29,7 +29,7 @@ export function HistoryPage() {
         setloading(true);
         try {
           const res = await fetch(
-            `${BackendURL}/api/user-history/${user.uid}`
+            `${BackendURL}/api/user-history/${user.authUser.uid}`
           );
           const data = await res.json();
           setValue(

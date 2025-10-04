@@ -56,7 +56,7 @@ export function FilesPage() {
     try {
       const res = await fetch(
         `${BackendURL}api/user/files/${
-          user.uid
+          user.authUser.uid
         }?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
           search
         )}`

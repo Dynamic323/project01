@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }) => {
           }
 
           setUser({
-            authUser: currentUser, // Pure Firebase Auth user
-            ...userData,            // Firestore data
+            authUser: currentUser, 
+            ...userData,            
           });
 
           const token = await currentUser.getIdToken();

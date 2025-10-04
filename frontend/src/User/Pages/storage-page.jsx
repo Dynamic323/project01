@@ -38,7 +38,7 @@ export function StoragePage() {
       if (!initialData) {
         try {
           const res = await fetch(
-            `${BackendURL}/api/storage-info/${user.uid}`
+            `${BackendURL}/api/storage-info/${user.authUser.uid}`
           );
           const data = await res.json();
           setValue("user-storageData", data);
