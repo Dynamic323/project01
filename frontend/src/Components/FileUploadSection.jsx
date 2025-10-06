@@ -42,7 +42,7 @@ export default function FileUploadSection({
             <p className="text-2xl font-bold text-white mb-2">
               Drop your files here
             </p>
-            <p className="text-slate-400">or click to browse</p>
+            <p className="text-slate-400">or click to browse from your device</p>
             {isFreePlan && (
               <p className="text-yellow-400 text-sm mt-2">
                 Free plan limit: {FREE_PLAN_MAX_SIZE_MB}MB max

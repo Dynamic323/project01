@@ -90,11 +90,11 @@ function User_Layout() {
           {/* Sidebar */}
           <div
             className={` h-screen  ${
-              sidebarCollapsed ? "w-20" : "w-64"
+              sidebarCollapsed ? "w-10 md:w-20" : "w-44 md:w-64"
             } bg-slate-800 border-r border-slate-700 transition-all duration-300 ease-in-out flex flex-col`}
           >
             {/* Sidebar Header */}
-            <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+            <div className="p-2 md:p-4 border-b border-slate-700 flex items-center justify-between">
               {!sidebarCollapsed && (
                 <h1 className="text-xl cursor-pointer  font-bold text-red-400 font-mono">
                   DyshareX
@@ -113,8 +113,8 @@ function User_Layout() {
             </div>
 
             {/* Sidebar Navigation */}
-            <nav className="flex-1 p-4">
-              <ul className="space-y-7 ">
+            <nav className="flex-1 md:p-4">
+              <ul className="space-y-3 md:space-y-7 ">
                 {sidebarItems.map((item, index) => (
                   <li key={index} className="">
                     <NavLink
@@ -134,7 +134,7 @@ function User_Layout() {
                     >
                       <item.icon
                         className={`${
-                          sidebarCollapsed ? "w-8 h-8" : "w-5 h-5"
+                          sidebarCollapsed ? "w-4 h-4 md:w-8 md:h-8" : " w-5 h-5"
                         } mr-0 ${
                           sidebarCollapsed ? "" : "group-hover:text-red-400"
                         } ${({ isActive }) =>

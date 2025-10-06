@@ -25,7 +25,7 @@ const FREE_PLAN_MAX_SIZE_MB = 50;
 // Main Dropzone component
 export function Dropzone() {
   const {user} = useAuth()
-  const UserPlan = user.UserPlan || "free"
+  const UserPlan = user?.UserPlan || "free"
   const isFreePlan = UserPlan === "free" ? true : false;
 
   // State variables
