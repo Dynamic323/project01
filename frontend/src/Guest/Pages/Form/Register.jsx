@@ -2,59 +2,51 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../../../context/Authcontext";
-
 import Spinner from "../../../Components/Spinner";
 
 function Register() {
   const { register, googleSignin, githubSignIn } = useAuth();
   const navigate = useNavigate();
-
-  const [formFildes, setFormfields] = useState({
+  const [formFields, setFormFields] = useState({
     name: "",
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setloading] = useState(false);
-
-  function handelChange(e) {
+  function handleChange(e) {
     const { name, value } = e.target;
-    setFormfields((prev) => ({
+    setFormFields((prev) => ({
       ...prev,
       [name]: value,
     }));
   }
 
-  const HandelSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email, password } = formFildes;
-
+    const { name, email, password } = formFields;
     if (!name || !email || !password) {
       toast.error("Please fill in all fields");
       return;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast.error("Please enter a valid email address");
       return;
     }
-
     if (password.length < 6) {
       toast.error("Password must be at least 6 characters long");
       return;
     }
-
     try {
-      setloading(true);
-      await register(email, password);
-      setloading(false);
+      setLoading(true);
+      await register(email, password, name);
+      setLoading(false);
       toast.success("Account created successfully! Welcome to Replico");
-
       navigate("/dashboard");
     } catch (error) {
-      setloading(false);
-      toast.error(`${error}`);
+      setLoading(false);
+      toast.error(error.message || "Registration failed");
       console.error(error);
     }
   };
@@ -82,45 +74,41 @@ function Register() {
   return (
     <div className="mt-auto pt-[7%]">
       <div className="max-w-md mx-auto border border-slate-700 p-5 rounded ">
-        <form onSubmit={HandelSubmit} className="">
+        <form onSubmit={handleSubmit} className="">
           <div className="text-3xl mb-6">Create an Account</div>
-
           <div className="flex flex-col gap-6 mb-6">
             <input
               className="border border-slate-400 p-3 rounded-xl"
               type="text"
               placeholder="User Name"
               name="name"
-              onChange={handelChange}
-              value={formFildes.name}
+              onChange={handleChange}
+              value={formFields.name}
             />
             <input
               className="border border-slate-400 p-3 rounded-xl"
               type="email"
               name="email"
               placeholder="Email"
-              onChange={handelChange}
-              value={formFildes.email}
+              onChange={handleChange}
+              value={formFields.email}
             />
             <input
               className="border border-slate-400 p-3 rounded-xl"
               type="password"
               placeholder="Password"
               name="password"
-              value={formFildes.password}
-              onChange={handelChange}
+              value={formFields.password}
+              onChange={handleChange}
             />
           </div>
-
           <span>Or Continue with Google/GitHub to sign up</span>
-
           <div className="flex gap-4 items-center my-4">
             <button
               type="button"
               onClick={handleGoogle}
               className="w-[50%] py-2.5 cursor-pointer  bg-slate-700 hover:bg-slate-600 rounded-3xl flex justify-center items-center"
             >
-              {/* Google SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
@@ -145,14 +133,11 @@ function Register() {
                 />
               </svg>
             </button>
-
-            {/* GitHub Button */}
             <button
               type="button"
               onClick={handleGithub}
               className="w-[50%] py-2.5 cursor-pointer bg-slate-400 hover:bg-slate-300 rounded-2xl flex justify-center items-center"
             >
-              {/* GitHub SVG */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="25"
@@ -164,7 +149,6 @@ function Register() {
               </svg>
             </button>
           </div>
-
           <button
             type="submit"
             className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-gradient-to-r from-red-400 to-red-500 text-gray-900 flex justify-center items-center"
@@ -172,7 +156,6 @@ function Register() {
           >
             {loading ? <Spinner /> : "Create"}
           </button>
-
           <span className="text-slate-400">
             Already have an Account?
             <Link to="/login">

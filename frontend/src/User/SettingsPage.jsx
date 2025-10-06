@@ -1,180 +1,196 @@
-
+import { useEffect, useState } from "react";
 import {
   AiOutlineSetting,
   AiOutlineUser,
-  AiOutlineKey,
   AiOutlineBell,
   AiOutlineEye,
   AiOutlineSave,
+  AiOutlineEdit,
+  AiOutlineCheckCircle,
+  AiOutlineCloseCircle,
 } from "react-icons/ai";
+import { useAuth } from "../context/Authcontext";
+import { toast } from "react-toastify";
+import EditProfileModal from "../Components/EditProfileModal";
 
 export function SettingsPage() {
-  return (
-    <div className="p-8 w-full">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3 mb-2">
-          <AiOutlineSetting className="h-8 w-8 text-red-400" />
-          Account Settings
-        </h1>
-        <p className="text-slate-400">
-          Manage your DyshareX account and preferences
-        </p>
-      </div>
+  const {
+    user,
+    updateUserSettings,
+    updateUserEmail,
+    updateUserDisplayName,
+  } = useAuth();
 
-      <div className="grid gap-8">
-        {/* Profile Settings */}
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-            <AiOutlineUser className="h-5 w-5 text-red-400" />
-            Profile Information
-          </h2>
-          <div className="grid gap-4">
-            <div>
-              <label className="block text-sm text-slate-300 mb-2">
-                Display Name
-              </label>
-              <input
-                type="text"
-                defaultValue="John Doe"
-                className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-red-400 focus:outline-none transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                defaultValue="john@example.com"
-                className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-red-400 focus:outline-none transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-2">
-                About Me
-              </label>
-              <textarea
-                defaultValue="I love sharing files and staying organized!"
-                className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-red-400 focus:outline-none transition-colors h-24 resize-none"
-              />
-            </div>
-          </div>
+  const [settings, setSettings] = useState({
+    isPublic: user?.isPublic ?? true,
+    defaultType: user?.defaultType ?? "text",
+    allowAnalytics: user?.allowAnalytics ?? true,
+    emailNotifications: user?.emailNotifications ?? true,
+    fileActivityAlerts: user?.fileActivityAlerts ?? false,
+  });
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setSettings({
+        isPublic: user.isPublic ?? true,
+        defaultType: user.defaultType ?? "text",
+        allowAnalytics: user.allowAnalytics ?? true,
+        emailNotifications: user.emailNotifications ?? true,
+        fileActivityAlerts: user.fileActivityAlerts ?? false,
+      });
+    }
+  }, [user]);
+
+  const saveSettings = async () => {
+    try {
+      await updateUserSettings(settings);
+      toast.success(" Settings saved successfully!", {
+        icon: <AiOutlineCheckCircle className="text-green-500" />,
+      });
+    } catch (error) {
+      toast.error("Failed to save settings", {
+        icon: <AiOutlineCloseCircle className="text-red-500" />,
+      });
+      console.error(error);
+    }
+  };
+
+  const handleToggle = (key) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-200 p-6">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <AiOutlineSetting className="text-2xl text-red-400" />
+          <h1 className="text-3xl font-bold">Settings</h1>
         </div>
 
-        {/* Account Settings */}
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-            <AiOutlineKey className="h-5 w-5 text-red-400" />
-            Account Security
-          </h2>
-          <div className="grid gap-4">
-            <div>
-              <label className="block text-sm text-slate-300 mb-2">
-                Change Password
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  placeholder="Enter new password"
-                  className="flex-1 p-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-red-400 focus:outline-none transition-colors"
-                />
-                <button className="px-4 py-3 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-300 transition-colors border border-slate-600">
-                  Update
+        {/* Settings Card */}
+        <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
+          {/* Profile Section */}
+          <div className="p-6 border-b border-slate-700">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <AiOutlineUser className="text-xl text-red-400" />
+                <h2 className="text-xl font-semibold">Profile</h2>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="bg-slate-700 w-16 h-16 rounded-full flex items-center justify-center text-xl">
+                {user?.displayName?.charAt(0) || "?"}
+              </div>
+              <div>
+                <p className="font-medium">{user?.displayName || "No name"}</p>
+                <p className="text-sm text-slate-400">{user?.email}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="mt-4 flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+            >
+              <AiOutlineEdit />
+              Edit Profile
+            </button>
+          </div>
+
+          {/* Privacy Section */}
+          <div className="p-6 border-b border-slate-700">
+            <div className="flex items-center gap-3 mb-6">
+              <AiOutlineEye className="text-xl text-red-400" />
+              <h2 className="text-xl font-semibold">Privacy</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Public Profile</p>
+                  <p className="text-sm text-slate-400">Allow others to see your profile</p>
+                </div>
+                <button
+                  onClick={() => handleToggle("isPublic")}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.isPublic ? "bg-red-500" : "bg-slate-600"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      settings.isPublic ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="two-factor"
-                className="w-4 h-4 text-red-400 bg-slate-800 border-slate-600 rounded focus:ring-red-400"
-              />
-              <label htmlFor="two-factor" className="text-sm text-slate-300">
-                Enable two-factor authentication for extra security
-              </label>
+          </div>
+
+          {/* Notifications Section */}
+          <div className="p-6 border-b border-slate-700">
+            <div className="flex items-center gap-3 mb-6">
+              <AiOutlineBell className="text-xl text-red-400" />
+              <h2 className="text-xl font-semibold">Notifications</h2>
+            </div>
+            <div className="space-y-5">
+              {[
+                {
+                  key: "emailNotifications",
+                  title: "Email Notifications",
+                  description: "Receive emails for updates and alerts",
+                },
+                {
+                  key: "fileActivityAlerts",
+                  title: "File Activity Alerts",
+                  description: "Get notified when files are changed",
+                },
+              ].map((item) => (
+                <div key={item.key} className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-sm text-slate-400">{item.description}</p>
+                  </div>
+                  <button
+                    onClick={() => handleToggle(item.key)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      settings[item.key] ? "bg-red-500" : "bg-slate-600"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        settings[item.key] ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
 
-        {/* Privacy Settings */}
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-            <AiOutlineEye className="h-5 w-5 text-red-400" />
-            Privacy & Sharing
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-800 border border-slate-600 rounded-lg">
-              <div>
-                <div className="text-white">Default File Visibility</div>
-                <div className="text-sm text-slate-400">
-                  Choose who can see your files by default
-                </div>
-              </div>
-              <select className="p-2 bg-slate-700 border border-slate-600 rounded text-white focus:border-red-400 focus:outline-none">
-                <option>Public - Anyone with link</option>
-                <option>Private - Only me</option>
-                <option>Friends - People I choose</option>
-              </select>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800 border border-slate-600 rounded-lg">
-              <div>
-                <div className="text-white">Allow File Analytics</div>
-                <div className="text-sm text-slate-400">
-                  Let us track views and downloads for insights
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                defaultChecked
-                className="w-4 h-4 text-red-400 bg-slate-800 border-slate-600 rounded focus:ring-red-400"
-              />
-            </div>
+          {/* Save Button */}
+          <div className="p-6">
+            <button
+              onClick={saveSettings}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-medium transition-colors"
+            >
+              <AiOutlineSave />
+              Save Settings
+            </button>
           </div>
-        </div>
-
-        {/* Notifications */}
-        <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-            <AiOutlineBell className="h-5 w-5 text-red-400" />
-            Notifications
-          </h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-slate-800 border border-slate-600 rounded-lg">
-              <div>
-                <div className="text-white">Email Notifications</div>
-                <div className="text-sm text-slate-400">
-                  Get updates about your files via email
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                defaultChecked
-                className="w-4 h-4 text-red-400 bg-slate-800 border-slate-600 rounded focus:ring-red-400"
-              />
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-800 border border-slate-600 rounded-lg">
-              <div>
-                <div className="text-white">File Activity Alerts</div>
-                <div className="text-sm text-slate-400">
-                  Notify me when someone views or downloads my files
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-red-400 bg-slate-800 border-slate-600 rounded focus:ring-red-400"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <button className="flex items-center gap-2 px-6 py-3 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-300 transition-colors border border-slate-600">
-            <AiOutlineSave className="h-4 w-4" />
-            Save Changes
-          </button>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={user}
+        updateUserEmail={updateUserEmail}
+        updateUserDisplayName={updateUserDisplayName}
+      />
     </div>
   );
 }

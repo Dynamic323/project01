@@ -1,6 +1,8 @@
-import { AiOutlineFile, AiOutlineFileText } from "react-icons/ai";
-
-export function UploadTypeToggle({ uploadType, setUploadType, resetForm }) {
+import {
+  AiOutlineFile,
+  AiOutlineFileText,
+} from "react-icons/ai";// ToggleButtons component
+export default function ToggleButtons({ uploadType, setUploadType, resetForm }) {
   return (
     <div className="flex gap-3 mb-8">
       <button
@@ -8,9 +10,9 @@ export function UploadTypeToggle({ uploadType, setUploadType, resetForm }) {
           setUploadType("files");
           resetForm();
         }}
-        className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all ${
+        className={`flex items-center gap-3 px-6 py-3 rounded-lg border-2 transition-all ${
           uploadType === "files"
-            ? "border-red-400 bg-slate-800 text-red-400"
+            ? "border-red-400 bg-slate-800 text-red-400 shadow-md"
             : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
         }`}
       >
@@ -22,9 +24,9 @@ export function UploadTypeToggle({ uploadType, setUploadType, resetForm }) {
           setUploadType("text");
           resetForm();
         }}
-        className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all ${
+        className={`flex items-center gap-3 px-6 py-3 rounded-lg border-2 transition-all ${
           uploadType === "text"
-            ? "border-red-400 bg-slate-800 text-red-400"
+            ? "border-red-400 bg-slate-800 text-red-400 shadow-md"
             : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
         }`}
       >

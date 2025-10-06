@@ -14,7 +14,7 @@ import {
 import { useAuth } from "../../context/Authcontext";
 import { useDashboard } from "../../context/DashboardContext";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   formatDate,
   formatSize,
@@ -23,6 +23,7 @@ import {
 } from "../../utils/file-helper";
 import { LazyImage } from "../../Components/LazyImage";
 import { Pagination } from "../../Components/Pagination";
+import { Subloader } from "../../Components/Loader";
 
 export function FilesPage() {
   const { user } = useAuth();
@@ -35,7 +36,9 @@ export function FilesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [showConfirm, setShowConfirm] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
-  const BackendURL = import.meta.env.VITE_APP_API_URL;
+  const BackendURL = import.meta.env.VITE_BACKEND_URL;
+  const FrontendURL = import.meta.env.VITE_FRONTEND_URL
+
   const navigate = useNavigate();
 
   const fetchFiles = async (page = 1, search = "") => {
@@ -58,6 +61,9 @@ export function FilesPage() {
           search
         )}`
       );
+
+      console.log(res);
+      
       if (!res.ok) throw new Error("Failed to fetch files");
       const data = await res.json();
       setFiles(data.files || []);
@@ -75,6 +81,8 @@ export function FilesPage() {
 
   useEffect(() => {
     fetchFiles(currentPage, searchTerm);
+    // console.log("Working");
+    
   }, [currentPage, searchTerm, user]);
 
   const handleDelete = async (id) => {
@@ -104,9 +112,9 @@ export function FilesPage() {
           </h1>
           <p className="text-slate-400">Manage all your uploaded files</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500">
+        <Link to={"/dashboard/dropzone"} className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500">
           <AiOutlinePlus className="h-4 w-4" /> Upload New File
-        </button>
+        </Link>
       </div>
 
       {/* Search */}
@@ -126,9 +134,7 @@ export function FilesPage() {
 
       {/* Files Grid */}
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-400"></div>
-        </div>
+       <Subloader />
       ) : files.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {files.map((file) => (
@@ -185,7 +191,7 @@ export function FilesPage() {
                     <AiOutlineEye className="inline h-3 w-3" /> Preview
                   </button>
                   <button
-                    onClick={() => handleCopy(`${BackendURL}/view/${file.id}`)}
+                    onClick={() => handleCopy(`${FrontendURL}/view/${file.id}`)}
                     className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
                   >
                     <AiOutlineCopy className="inline h-3 w-3" /> Copy

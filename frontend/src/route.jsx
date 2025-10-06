@@ -8,6 +8,7 @@ import User_Layout from "./User/User_Layout";
 import ProtectedRoute from "./Middleware/ProtectedRoute";
 import Dashboard from "./User/Dashboard";
 import { HistoryPage } from "./User/HistoryPage";
+import { Dropzone } from "./Components/Dropzone";
 import { SettingsPage } from "./User/SettingsPage";
 import { FilesPage } from "./User/Pages/files-page";
 import { StoragePage } from "./User/Pages/storage-page";
@@ -69,6 +70,10 @@ export const router = createBrowserRouter([
       {
         path: "settings",
         element: <SettingsPage />,
+      },
+      {
+        path: "dropzone",
+        element: <Dropzone />,
       },
     ],
   },

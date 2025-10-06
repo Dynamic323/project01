@@ -1,12 +1,21 @@
-import { AiOutlineCloudUpload } from "react-icons/ai";
-
-export function FileUploadSection({
+import FileItem from "./FileItem";
+import {
+  AiOutlineCloudUpload,
+  AiOutlineFile,
+} from "react-icons/ai";
+// FileUploadSection component
+export default function FileUploadSection({
   isDragOver,
+  files,
+  isFreePlan,
   handleDragOver,
   handleDragLeave,
   handleDrop,
   handleFileSelect,
-  isFreePlan,
+  removeFile,
+  handleFilenameEdit,
+  getFileIcon,
+  calculateTotalSize,
   FREE_PLAN_MAX_SIZE_MB
 }) {
   return (
@@ -45,7 +54,7 @@ export function FileUploadSection({
               (type) => (
                 <span
                   key={type}
-                  className="px-3 py-1 bg-slate-800 text-red-400 rounded-full text-xs border border-slate-700"
+                  className="px-4 py-2 bg-slate-800 text-red-400 rounded-full text-xs border border-slate-700"
                 >
                   {type}
                 </span>
@@ -54,6 +63,38 @@ export function FileUploadSection({
           </div>
         </div>
       </div>
+
+      {files.length > 0 && (
+        <div className="border border-slate-700 rounded-xl bg-slate-900 overflow-hidden">
+          <div className="border-b border-slate-700 bg-slate-800 px-6 py-4">
+            <h4 className="font-bold text-white flex items-center gap-2">
+              <AiOutlineFile className="text-red-400" />
+              Selected Files ({files.length})
+              <span className="text-xs text-yellow-400 ml-2">
+                (Max {FREE_PLAN_MAX_SIZE_MB}MB for free plan)
+              </span>
+            </h4>
+          </div>
+          <div className="p-6 space-y-3">
+            {files.map((file, index) => (
+              <FileItem
+                key={index}
+                file={file}
+                index={index}
+                removeFile={removeFile}
+                handleFilenameEdit={handleFilenameEdit}
+                getFileIcon={getFileIcon}
+                isFreePlan={isFreePlan}
+              />
+            ))}
+            <div className="text-xs text-yellow-400 mt-2">
+              Total size:{" "}
+              {(calculateTotalSize(files) / (1024 * 1024)).toFixed(2)} MB
+              /{FREE_PLAN_MAX_SIZE_MB}MB
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

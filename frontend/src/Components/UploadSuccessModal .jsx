@@ -18,6 +18,7 @@ import {
 } from "react-icons/ai";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
+import { handleCopy } from "../utils/file-helper";
 // import Confetti from "react-confetti";
 
 const UploadSuccessModal = ({ data, onClose }) => {
@@ -86,6 +87,8 @@ const UploadSuccessModal = ({ data, onClose }) => {
       return fileUrl;
     return null;
   };
+
+  const FrontendURL = import.meta.env.VITE_FRONTEND_URL
 
   return (
     <>
@@ -217,14 +220,13 @@ const UploadSuccessModal = ({ data, onClose }) => {
                                       <div className="relative flex-1">
                                         <input
                                           type="text"
-                                          value={item.file_url}
+                                          value={item.id}
                                           readOnly
                                           className="w-full bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-green-400"
                                         />
                                         <button
-                                          onClick={() =>
-                                            copyToClipboard(item.file_url)
-                                          }
+onClick={() => handleCopy(`${FrontendURL}/view/${file.id}`)}
+                                       
                                           className="absolute right-2 inset-y-0 p-1 text-slate-400 hover:text-white"
                                           title="Copy URL"
                                         >

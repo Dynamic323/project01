@@ -1,7 +1,11 @@
-import { AiOutlineFileText } from "react-icons/ai";
 import { Code } from "lucide-react";
+import {
+  AiOutlineFileText,
+} from "react-icons/ai";
 
-export function TextUploadSection({ textContent, setTextContent, setHasUnsavedChanges }) {
+
+// TextUploadSection component
+export default function TextUploadSection({ textContent, setTextContent, setHasUnsavedChanges }) {
   return (
     <div className="border border-slate-700 rounded-xl overflow-hidden bg-slate-900">
       <div className="border-b border-slate-700 bg-slate-800 px-6 py-4">

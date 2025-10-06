@@ -96,13 +96,13 @@ function User_Layout() {
             {/* Sidebar Header */}
             <div className="p-4 border-b border-slate-700 flex items-center justify-between">
               {!sidebarCollapsed && (
-                <h1 className="text-xl font-bold text-red-400 font-mono">
+                <h1 className="text-xl cursor-pointer  font-bold text-red-400 font-mono">
                   DyshareX
                 </h1>
               )}
               <button
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-2 rounded-md hover:bg-slate-700 transition-colors"
+                className="p-2 cursor-pointer  rounded-md hover:bg-slate-700 transition-colors"
               >
                 {sidebarCollapsed ? (
                   <ChevronRight className="w-5 h-5 text-slate-300" />

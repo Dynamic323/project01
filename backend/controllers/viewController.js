@@ -131,6 +131,7 @@ const parsePagination = (req) => {
 exports.getUserFiles = async (req, res) => {
   const { userId } = req.params;
   const { limit, offset, search } = parsePagination(req);
+  console.log("reached here ");
 
   try {
     const where =
@@ -219,6 +220,7 @@ exports.getUserTexts = async (req, res) => {
 
 // ---------- All (files + texts) ----------
 exports.getUserAll = async (req, res) => {
+  
   const { userId } = req.params;
   const { limit, offset, search } = parsePagination(req);
 

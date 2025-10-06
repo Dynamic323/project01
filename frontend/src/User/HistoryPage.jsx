@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/Authcontext";
 import { toast } from "react-toastify";
 import { useDashboard } from "../context/DashboardContext";
-import Loader from "../Components/Loader";
+import Loader, { Subloader } from "../Components/Loader";
 
 export function HistoryPage() {
   const { getValue, setValue } = useDashboard();
@@ -78,7 +78,7 @@ export function HistoryPage() {
       </div>
 
       {loading ? (
-        <Loader isdashboard={true} text={"Please Wait,  Loading Text...."} />
+        <Subloader text={"  Loading History...."} />
       ) : (
         // <div className="text-center text-slate-400 pt-6">Loading files…</div>
         <div className="grid gap-4">

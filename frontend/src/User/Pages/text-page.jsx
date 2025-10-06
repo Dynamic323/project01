@@ -15,7 +15,7 @@ import { useDashboard } from "../../context/DashboardContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import Loader from "../../Components/Loader";
+import Loader, { Subloader } from "../../Components/Loader";
 export default function TextPage() {
   const { user } = useAuth();
   const { getValue, setValue } = useDashboard();
@@ -218,11 +218,8 @@ export default function TextPage() {
       </div>
       {/* Text List */}
       {loading ? (
-        // <div className="flex justify-center items-center h-64">
-        //   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-400"></div>
-        // </div>
+       <Subloader text={"Loading Text...."} />
 
-        <Loader isdashboard={true} text={"Please Wait,  Loading Text...."} />
       ) : currentTexts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentTexts.map((txt) => (

@@ -7,7 +7,7 @@ import {
 } from "react-icons/ai";
 import { useAuth } from "../../context/Authcontext";
 import { toast } from "react-toastify";
-import Loader from "../../Components/Loader";
+import Loader, { Subloader } from "../../Components/Loader";
 import { useDashboard } from "../../context/DashboardContext";
 
 const typeColors = {
@@ -56,9 +56,8 @@ export function StoragePage() {
 
   if (loading)
     return (
-      <Loader
-        isdashboard={true}
-        text={"Please Wait,  Loading Storage info...."}
+      <Subloader
+        text={"Loading Storage info...."}
       />
     );
   if (!storageData)

@@ -20,3 +20,18 @@ export default function Loader({ text, isdashboard }) {
     </div>
   );
 }
+
+
+export const Subloader =({text})=>{
+  return (
+      <div className="flex justify-center items-center h-64">
+       
+      <div className="relative flex flex-col gap-2.5 items-center">
+        <div className="custom-loader"></div>
+        <span className="text-white font-bold">
+         {text ? text : "Loading..."}
+        </span>
+      </div>
+        </div>
+  )
+}

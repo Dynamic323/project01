@@ -5,6 +5,7 @@ import { Dropzone } from "../Components/Dropzone";
 import { useNavigate } from "react-router-dom";
 import { Upload, User, Code, File, Terminal } from "lucide-react";
 import Recent_files from "../Components/Recent_files";
+import DashboardHeader from "../Components/DashboardHeader";
 function Dashboard() {
   const { logout } = useAuth();
 
@@ -64,23 +65,7 @@ function Dashboard() {
     <div className="flex-1  flex flex-col">
       {/* Main Content */}
       {/* Header */}
-      <header className="bg-slate-800 border-b border-slate-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-slate-100 font-mono">
-              Dashboard
-            </h2>
-            <p className="text-slate-400 mt-1 font-mono text-sm">
-              Share your code and text files instantly
-            </p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-red-400 rounded-full flex items-center justify-center">
-              <span className="text-slate-900 font-bold">U</span>
-            </div>
-          </div>
-        </div>
-      </header>
+    <DashboardHeader/>
 
       {/* Main Content Area */}
       <main className="flex-1 p-6 bg-slate-900">
@@ -178,3 +163,5 @@ function helloWorld() {
 }
 
 export default Dashboard;
+
+
