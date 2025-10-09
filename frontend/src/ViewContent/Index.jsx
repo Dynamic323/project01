@@ -213,7 +213,7 @@ export default function Index() {
               Join now to upload, share, and manage your files with ease.
             </p>
             <Link
-              to="/signup"
+              to="/register"
               className="inline-flex items-center px-6 py-3 bg-red-400 hover:bg-red-500 text-white font-semibold rounded-lg"
             >
               <FiUserPlus className="mr-2" /> Create Account
