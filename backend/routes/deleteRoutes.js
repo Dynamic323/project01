@@ -1,8 +1,7 @@
 const express = require("express");
+const { deleteUpload } = require("../controllers/deleteController");
 const router = express.Router();
 
-// // const {}
-// router.delete("/files/${id}", deleteFile)
-// router.delete("/text/${id}", deleteText)
+router.delete("/delete/:id", deleteUpload);
 
 module.exports = router;

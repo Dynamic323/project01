@@ -13,7 +13,7 @@ import {
 import { useAuth } from "../../context/Authcontext";
 import { useDashboard } from "../../context/DashboardContext";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Loader, { Subloader } from "../../Components/Loader";
 import {BackendURL} from "../../utils/file-helper"
@@ -203,10 +203,10 @@ export default function TextPage() {
               View and manage all your saved text snippets
             </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors">
+          <Link to={"/dashboard/dropzone?mode=text"} className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors">
             <AiOutlinePlus className="h-4 w-4" />
             Create New Text
-          </button>
+          </Link>
         </div>
         {/* Search */}
         <div className="relative mb-6">
@@ -296,10 +296,10 @@ export default function TextPage() {
           <p className="mb-4">
             No texts found{searchTerm ? ` matching "${searchTerm}"` : ""}.
           </p>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors mx-auto">
+          <Link  to={"/dashboard/dropzone?mode=text"} className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors mx-auto">
             <AiOutlinePlus className="h-4 w-4" />
             Create Your First Text
-          </button>
+          </Link>
         </div>
       )}
       {/* Pagination */}

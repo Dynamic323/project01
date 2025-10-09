@@ -82,7 +82,7 @@ export function StoragePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main */}
         <div className="lg:col-span-2">
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 mb-6">
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 md:p-6 mb-6">
             <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
               <AiOutlinePieChart className="h-5 w-5 text-red-400" />
               Storage Usage
@@ -107,7 +107,7 @@ export function StoragePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-slate-800 border border-slate-600 rounded-lg p-4">
                 <div className="text-2xl font-bold text-white">{files}</div>
                 <div className="text-slate-400 text-sm">Total Files</div>
@@ -122,7 +122,7 @@ export function StoragePage() {
           </div>
 
           {/* File Types */}
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 mb-6">
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 md:p-6 mb-6">
             <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
               <AiOutlineFile className="h-5 w-5 text-red-400" />
               File Types

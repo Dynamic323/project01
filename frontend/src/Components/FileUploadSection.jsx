@@ -24,7 +24,7 @@ export default function FileUploadSection({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed rounded-xl p-16 text-center transition-all ${
+        className={`relative border-2 border-dashed rounded-xl  p-7 md:p-10 text-center transition-all ${
           isDragOver
             ? "border-red-400 bg-slate-800/50"
             : "border-slate-600 bg-slate-900 hover:border-red-400/50"

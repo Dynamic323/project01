@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../../Components/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Authcontext";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Spinner from "../../../Components/Spinner";
 
 function Login() {
-  const { login, googleSignin, githubSignIn } = useAuth();
-  const [loading, setloading] = useState(false);
+  const { login, googleSignin, githubSignIn ,user} = useAuth();
   const navigate = useNavigate();
+   useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+  const [loading, setloading] = useState(false);
   const [formFildes, setFormfields] = useState({
     password: "",
     email: "",
@@ -68,7 +73,7 @@ function Login() {
       setloading(true);
       await login(email, password);
       setloading(false);
-      toast.success("Account created successfully! Welcome to Replico");
+toast.success("Logged in successfully! Welcome back 👋");
       navigate("/dashboard");
     } catch (error) {
       setloading(false);
@@ -79,14 +84,22 @@ function Login() {
 
   return (
     <>
-      <div className="mt-auto pt-[7%] ">
-        <div className=" max-w-md mx-auto border border-slate-700 p-5 rounded ">
-          <form action="" onSubmit={HandelSubmit}>
-            <div className=" text-3xl "> Log in to your Account! </div>
+      <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
+        <ToastContainer />
+        <div className="w-full max-w-md mx-auto border border-slate-700 p-5 sm:p-6 rounded-lg bg-slate-900/50 backdrop-blur-sm">
+          <form
+            action=""
+            onSubmit={HandelSubmit}
+            className="space-y-4 sm:space-y-6"
+          >
+            <div className="text-2xl sm:text-3xl font-semibold text-center mb-4 sm:mb-6 text-white ">
+              {" "}
+              Log in to your Account!{" "}
+            </div>
 
-            <div className="flex flex-col my-5 gap-7">
+            <div className="flex flex-col gap-4 sm:gap-5 mb-4 sm:mb-6">
               <input
-                className="border border-slate-400 p-3 rounded-s-2xl"
+                className="border border-slate-600 p-2.5 sm:p-3 rounded-lg bg-slate-800 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400"
                 onChange={Handelchange}
                 type="email"
                 placeholder="Email"
@@ -94,7 +107,7 @@ function Login() {
                 name="email"
               />
               <input
-                className="border border-slate-400 p-3 rounded-s-2xl"
+                className="border border-slate-600 p-2.5 sm:p-3 rounded-lg bg-slate-800 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400"
                 onChange={Handelchange}
                 type="password"
                 placeholder="Password"
@@ -102,19 +115,21 @@ function Login() {
                 name="password"
               />
             </div>
-            <span>Or Continue with Google/GitHub to sign up</span>
 
-            <div className="flex gap-4 items-center my-4">
+            <span className="block text-center text-slate-300 text-sm mb-3 sm:mb-4">
+              Or Continue with Google/GitHub to sign up
+            </span>
+
+            <div className="flex gap-3 sm:gap-4 items-center my-3 sm:my-4">
               <button
                 type="button"
                 onClick={handleGoogle}
-                className="w-[50%] py-2.5 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-3xl flex justify-center items-center"
+                className="w-[50%] py-2 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-xl flex justify-center items-center transition-colors"
               >
-                {/* Google SVG */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="25"
-                  height="25"
+                  width="22"
+                  height="22"
                   viewBox="0 0 48 48"
                 >
                   <path
@@ -135,20 +150,17 @@ function Login() {
                   />
                 </svg>
               </button>
-
-              {/* GitHub Button */}
               <button
                 type="button"
                 onClick={handleGithub}
-                className="w-[50%] py-2.5 cursor-pointer bg-slate-400 hover:bg-slate-300 rounded-2xl flex justify-center items-center"
+                className="w-[50%] py-2 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-xl flex justify-center items-center transition-colors"
               >
-                {/* GitHub SVG */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="25"
-                  height="25"
+                  width="22"
+                  height="22"
                   viewBox="0 0 24 24"
-                  fill="black"
+                  fill="white"
                 >
                   <path d="M12 0C5.37 0 0 5.373 0 12a12 12 0 0 0 8.207 11.385c.6.11.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.334-1.756-1.334-1.756-1.09-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.806 1.305 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.467-1.335-5.467-5.935 0-1.31.468-2.38 1.236-3.22-.124-.303-.536-1.522.117-3.176 0 0 1.008-.322 3.3 1.23A11.52 11.52 0 0 1 12 6.844c1.02.005 2.045.138 3.003.405 2.29-1.552 3.297-1.23 3.297-1.23.654 1.654.242 2.873.118 3.176.77.84 1.235 1.91 1.235 3.22 0 4.61-2.807 5.632-5.48 5.927.43.372.814 1.103.814 2.222 0 1.606-.014 2.903-.014 3.296 0 .32.216.694.825.576A12.005 12.005 0 0 0 24 12c0-6.627-5.373-12-12-12z" />
                 </svg>
@@ -157,15 +169,19 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full mb-3 cursor-pointer py-3 rounded-2xl bg-gradient-to-tr from-red-400 to-red-500 text-gray-900 text-white flex justify-center items-center"
+              className="w-full mb-3 cursor-pointer py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-red-400 to-red-500 text-white font-medium flex justify-center items-center transition-all hover:from-red-500 hover:to-red-600"
+              disabled={loading}
             >
-              {loading ? <Spinner /> : "Login"}
+              {loading ? <Spinner /> : "Create"}
             </button>
-            <span className="text-slate-400  ">
+
+            <span className="block text-center text-slate-400 text-xs sm:text-sm">
               Don't have an Account ?
               <Link to="/register">
-                <span>
-                  <i className="text-red-400 underline">Create new account</i>
+                <span><br />
+                  <i className="text-red-400 mt-2 underline hover:text-red-300 transition-colors">
+                    Create new account
+                  </i>
                 </span>
               </Link>
             </span>

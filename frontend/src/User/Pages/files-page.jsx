@@ -23,11 +23,11 @@ import {
 import { LazyImage } from "../../Components/LazyImage";
 import { Pagination } from "../../Components/Pagination";
 import { Subloader } from "../../Components/Loader";
+import { handleDelete } from "../../utils/Helper_Function";
 
 export function FilesPage() {
   const { user } = useAuth();
   const { getValue, setValue } = useDashboard();
-  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,70 +35,66 @@ export function FilesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [showConfirm, setShowConfirm] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
-
   const navigate = useNavigate();
+
+  // Get files from context
+  const files = getValue("files") || [];
 
   const fetchFiles = async (page = 1, search = "") => {
     
     if (!user?.authUser.uid) return;
+    console.log(files);
+    
 
-    const cachedFiles = getValue("files");
-
-   
-
-    if (!cachedFiles) {
-        setLoading(true);
+   if (files.length <= 0) {
+     setLoading(true);
     try {
       const res = await fetch(
-        `${BackendURL}/api/user/files/${
-          user.authUser.uid
-        }?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(
-          search
-        )}`
+        `${BackendURL}/api/user/files/${user.authUser.uid}?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}`
       );
 
-      
       if (!res.ok) throw new Error("Failed to fetch files");
       const data = await res.json();
-      setFiles(data.files || []);
       setTotalPages(data.pagination?.totalPages || 1);
-      setValue("files", data.files);
+      setValue("files", data.files || []);
     } catch (err) {
       toast.error("Error fetching files");
       console.error(err);
-      setFiles([]);
       setValue("files", []);
     } finally {
       setLoading(false);
     }
-    }
-
+   }
   };
 
   useEffect(() => {
     fetchFiles(currentPage, searchTerm);
-    
   }, [currentPage, searchTerm, user]);
 
-  const handleDelete = async (id) => {
+  const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
+
+  const handleDeleteItem = async () => {
+    if (!fileToDelete) return;
+
     try {
-      const res = await fetch(`${BackendURL}/api/files/${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error("Failed to delete file");
-      toast.success("File deleted");
-      setShowConfirm(false);
-      fetchFiles(currentPage, searchTerm);
+      const success = await handleDelete(fileToDelete.id, "file");
+      if (success) {
+        // Update context value by filtering out the deleted file
+        const currentFiles = getValue("files") || [];
+        setValue(
+          "files",
+          currentFiles.filter(file => file.id !== fileToDelete.id)
+        );
+        setShowConfirm(false);
+      }
     } catch (err) {
       toast.error("Failed to delete file");
       console.error(err);
     }
   };
 
-  const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
-
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-3 sm:p-6 md:p-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
@@ -129,13 +125,13 @@ export function FilesPage() {
 
       {/* Files Grid */}
       {loading ? (
-       <Subloader />
+        <Subloader />
       ) : files.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {files.map((file) => (
             <div
               key={file.id}
-              className="bg-slate-800  border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-all"
+              className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-slate-600 transition-all"
             >
               {file.file_type?.startsWith("image/") && (
                 <LazyImage src={file.file_url} alt={file.title || "image"} />
@@ -154,19 +150,19 @@ export function FilesPage() {
                 </div>
                 <div className="space-y-1 mb-4 text-sm">
                   <div className="flex justify-between text-slate-400">
-                    <span>Size</span>{" "}
+                    <span>Size</span>
                     <span className="text-white">
                       {formatSize(file.file_size)}
                     </span>
                   </div>
                   <div className="flex justify-between text-slate-400">
-                    <span>Uploaded</span>{" "}
+                    <span>Uploaded</span>
                     <span className="text-white">
                       {formatDate(file.created_at)}
                     </span>
                   </div>
                   <div className="flex justify-between text-slate-400">
-                    <span>Expires</span>{" "}
+                    <span>Expires</span>
                     <span className="text-white">
                       {formatDate(file.expires_at)}
                     </span>
@@ -246,7 +242,7 @@ export function FilesPage() {
                 Cancel
               </button>
               <button
-                onClick={() => handleDelete(fileToDelete.id)}
+                onClick={handleDeleteItem}
                 className="px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 flex items-center gap-2"
               >
                 <AiOutlineDelete /> Delete

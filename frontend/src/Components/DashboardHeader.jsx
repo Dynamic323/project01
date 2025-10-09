@@ -48,7 +48,7 @@ const DashboardHeader = () => {
           <h2 className="text-2xl font-semibold text-slate-100 font-mono">
             Dashboard
           </h2>
-          <p className="text-slate-400 mt-1 font-mono text-sm">
+          <p className="hidden sm:visible text-slate-400 mt-1 font-mono text-sm">
             Share your code and text files instantly
           </p>
         </div>

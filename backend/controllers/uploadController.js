@@ -6,9 +6,11 @@ const uploadContent = async (req, res) => {
   try {
     const { text, expiresAt, isPublic, title, type, Texttype, user_id } =
       req.body;
-    const previewOnly = req.query.preview === "true"; // Check for preview query parameter
-    console.log(req.body);
-    // Collect files from multer
+
+      console.log(user_id);
+      
+    const previewOnly = req.query.preview === "true"; 
+ 
     let files = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       files = req.files;
@@ -46,7 +48,7 @@ const uploadContent = async (req, res) => {
       return res.status(201).json({
         success: true,
         message: "Text upload successful",
-        data: { id, type: finalType, content: text },
+        data: { id, type: finalType, content: text, title:title },
       });
     }
     // ----- FILE UPLOAD -----

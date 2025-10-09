@@ -13,6 +13,7 @@ import {
   FiCode,
   FiDownload,
 } from "react-icons/fi";
+import { toast } from "react-toastify";
 export const formatSize = (b) => {
   const sizes = ["B", "KB", "MB", "GB"];
   if (!b) return "0 B";
@@ -27,9 +28,9 @@ export const formatDate = (date) =>
     day: "numeric",
   });
 
-export const handleCopy = (link ) => {
+export const handleCopy = (link , msg) => {
   navigator.clipboard.writeText(link);
-  toast.success("Link copied!");
+  toast.success(msg || "Link copied!");
 };
 
 export const getFileIcon = (type) => {

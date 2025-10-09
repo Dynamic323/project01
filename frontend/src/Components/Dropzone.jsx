@@ -24,8 +24,12 @@ const FREE_PLAN_MAX_SIZE_MB = 50;
 
 // Main Dropzone component
 export function Dropzone() {
-  const {user} = useAuth()
-  const UserPlan = user?.UserPlan || "free"
+  const params = new URLSearchParams(window.location.search);
+
+  const mode = params.get("mode");
+
+  const { user } = useAuth();
+  const UserPlan = user?.UserPlan || "free";
   const isFreePlan = UserPlan === "free" ? true : false;
 
   // State variables
@@ -50,7 +54,7 @@ export function Dropzone() {
   const { uploading, error, success, uploadFile } = useUploader("/api/upload");
 
   // Block navigation if there are unsaved changes
-  useEffect(() => { 
+  useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
@@ -209,6 +213,14 @@ export function Dropzone() {
     setAbortController(null);
   };
 
+  useEffect(() => {
+    if (mode === "text") {
+      setUploadType("text");
+
+      resetForm();
+    }
+  }, [mode]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -226,6 +238,12 @@ export function Dropzone() {
       const controller = new AbortController();
       setAbortController(controller);
       let response = null;
+
+      const userData = localStorage.getItem("user");
+      const parsedUser = userData ? JSON.parse(userData) : {};
+      const userId = parsedUser?.uid || "Guest";
+console.log(userId);
+
       if (files.length != 0) {
         response = await uploadFile(
           {
@@ -234,7 +252,7 @@ export function Dropzone() {
             type: "file",
             expiresAt,
             isPublic,
-            user_id: JSON.parse(localStorage.getItem("user")).uid,
+            user_id: userId,
           },
           { signal: controller.signal }
         );
@@ -246,7 +264,7 @@ export function Dropzone() {
             type: contentType,
             expiresAt,
             isPublic,
-            user_id: JSON.parse(localStorage.getItem("user")).uid,
+            user_id: userId,
           },
           { signal: controller.signal }
         );
@@ -265,6 +283,8 @@ export function Dropzone() {
       setShowSuccessModal(true);
     } catch (error) {
       if (error.name !== "AbortError") {
+        console.log(error);
+
         toast.error(error?.message || "Upload failed. Please try again.");
       }
       setIsSubmitting(false);
@@ -301,13 +321,14 @@ export function Dropzone() {
         handleFilenameEdit={handleFilenameEdit}
         getFileIcon={getFileIcon}
         setShowmodal={setShowmodal}
+        removeFile={removeFile}
         fileNames={fileNames}
       />
     );
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-6 space-y-8">
+    <div className="w-full max-w-5xl mx-auto p-2 md:p-6 space-y-8">
       <ToggleButtons
         uploadType={uploadType}
         setUploadType={setUploadType}
@@ -357,8 +378,3 @@ export function Dropzone() {
     </div>
   );
 }
-
-
-
-
-

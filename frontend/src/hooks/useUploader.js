@@ -6,6 +6,7 @@ export default function useUploader(uploadUrl) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+console.log("lol");
 
   const uploadFile = async (
     {
@@ -21,6 +22,8 @@ export default function useUploader(uploadUrl) {
     },
     options = {}
   ) => {
+    console.log("UserID" + user_id);
+    
     setUploading(true);
     setError(null);
     setSuccess(false);

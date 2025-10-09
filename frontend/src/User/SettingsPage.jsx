@@ -65,7 +65,7 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 p-6">
+    <div className="min-h-screen bg-slate-900 text-slate-200 p-3 md:p-6">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
@@ -76,7 +76,7 @@ export function SettingsPage() {
         {/* Settings Card */}
         <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
           {/* Profile Section */}
-          <div className="p-6 border-b border-slate-700">
+          <div className=" p-3 md:p-6 border-b border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <AiOutlineUser className="text-xl text-red-400" />
@@ -102,7 +102,7 @@ export function SettingsPage() {
           </div>
 
           {/* Privacy Section */}
-          <div className="p-6 border-b border-slate-700">
+          <div className=" p-3 md:p-6 border-b border-slate-700">
             <div className="flex items-center gap-3 mb-6">
               <AiOutlineEye className="text-xl text-red-400" />
               <h2 className="text-xl font-semibold">Privacy</h2>
@@ -130,7 +130,7 @@ export function SettingsPage() {
           </div>
 
           {/* Notifications Section */}
-          <div className="p-6 border-b border-slate-700">
+          <div className=" p-3 md:p-6 border-b border-slate-700">
             <div className="flex items-center gap-3 mb-6">
               <AiOutlineBell className="text-xl text-red-400" />
               <h2 className="text-xl font-semibold">Notifications</h2>

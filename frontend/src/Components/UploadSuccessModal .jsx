@@ -16,31 +16,17 @@ import {
   AiOutlineCheckCircle,
   AiOutlineSmile,
 } from "react-icons/ai";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
-import { handleCopy } from "../utils/file-helper";
-// import Confetti from "react-confetti";
+import { FrontendURL, handleCopy } from "../utils/file-helper";
+import { Copy } from "lucide-react";
 
 const UploadSuccessModal = ({ data, onClose }) => {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState("files");
   const [isMounted, setIsMounted] = useState(false);
-  //   const [showConfetti, setShowConfetti] = useState(false);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
 
-  // Set up confetti and window dimensions
   useEffect(() => {
     setIsMounted(true);
-    //     setShowConfetti(true);
-    //     setWidth(window.innerWidth);
-    //     setHeight(window.innerHeight);
-
-    //     const timer = setTimeout(() => {
-    //       setShowConfetti(false);
-    //     }, 3000);
-
-    //     return () => clearTimeout(timer);
   }, []);
 
   // Determine if the data is text/code or files
@@ -88,20 +74,10 @@ const UploadSuccessModal = ({ data, onClose }) => {
     return null;
   };
 
-  const FrontendURL = import.meta.env.VITE_FRONTEND_URL
-
+  
   return (
     <>
-      {/* {showConfetti && (
-        <Confetti
-          width={width}
-          height={height}
-          colors={["#10B981", "#3B82F6", "#F59E0B", "#EF4444"]}
-          recycle={false}
-          numberOfPieces={200}
-        />
-      )} */}
-
+      <ToastContainer />
       <AnimatePresence>
         {isMounted && (
           <motion.div
@@ -115,7 +91,7 @@ const UploadSuccessModal = ({ data, onClose }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="bg-slate-800/95 rounded-xl p-6 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800 border border-slate-700 shadow-2xl"
+              className="bg-slate-800/95 rounded-xl p-6 max-w-3xl w-full mx-2 md:mx-4 max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800 border border-slate-700 shadow-2xl"
             >
               {/* Success Header */}
               <div className="flex flex-col items-center mb-6 text-center">
@@ -131,209 +107,209 @@ const UploadSuccessModal = ({ data, onClose }) => {
                 </p>
               </div>
 
-              {/* Tabs for multiple upload types */}
-              {isTextUpload && isFileUpload && (
-                <div className="flex gap-1 mb-6 justify-center">
-                  <button
-                    onClick={() => setActiveTab("files")}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                      activeTab === "files"
-                        ? "bg-green-400 text-white shadow-md shadow-green-400/30"
-                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    }`}
-                  >
-                    Files
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("text")}
-                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                      activeTab === "text"
-                        ? "bg-green-400 text-white shadow-md shadow-green-400/30"
-                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    }`}
-                  >
-                    Text/Code
-                  </button>
-                </div>
-              )}
-
               {/* Content */}
               <div className="space-y-6">
-                {activeTab === "files" && (
+                {/* File Upload Layout */}
+                {isFileUpload && (
                   <>
-                    {isFileUpload &&
-                      data.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
-                        >
-                          <div className="flex flex-col md:flex-row gap-4">
-                            {/* File preview */}
-                            {getFilePreview(item.file_name, item.file_url) && (
-                              <div className="w-full md:w-40 h-32 rounded-lg overflow-hidden border border-slate-600">
-                                <img
-                                  src={item.file_url}
-                                  alt={item.file_name}
-                                  className="w-full h-full object-cover"
-                                />
+                    {data.map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
+                      >
+                        <div className="flex flex-col md:flex-row gap-4">
+                          {/* File preview */}
+                          {getFilePreview(item.file_name, item.file_url) && (
+                            <div className="w-full md:w-40 h-32 rounded-lg overflow-hidden border border-slate-600">
+                              <img
+                                src={item.file_url}
+                                alt={item.file_name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          {/* File info */}
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-start gap-3">
+                              <div className="mt-1">
+                                {getFileIcon(item.file_name)}
                               </div>
-                            )}
-
-                            {/* File info */}
-                            <div className="flex-1 space-y-3">
-                              <div className="flex items-start gap-3">
-                                <div className="mt-1">
-                                  {getFileIcon(item.file_name)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-white font-medium text-lg truncate">
-                                    {item.title || item.file_name}
-                                  </h3>
-                                  <div className="grid grid-cols-2 gap-2 mt-2">
-                                    <div>
-                                      <p className="text-xs text-slate-400">
-                                        Type
-                                      </p>
-                                      <p className="text-sm text-white truncate">
-                                        {item.file_type}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-xs text-slate-400">
-                                        Size
-                                      </p>
-                                      <p className="text-sm text-white">
-                                        {formatFileSize(item.file_size)}
-                                      </p>
-                                    </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-white font-medium text-lg truncate">
+                                  {item.title || item.file_name}
+                                </h3>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                  <div>
+                                    <p className="text-xs text-slate-400">Type</p>
+                                    <p className="text-sm text-white truncate">
+                                      {item.file_type}
+                                    </p>
                                   </div>
-
-                                  {/* URL with copy */}
-                                  <div className="mt-3">
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-xs text-slate-400">
-                                        URL:
-                                      </span>
-                                      <div className="relative flex-1">
-                                        <input
-                                          type="text"
-                                          value={item.id}
-                                          readOnly
-                                          className="w-full bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-green-400"
-                                        />
-                                        <button
-onClick={() => handleCopy(`${FrontendURL}/view/${file.id}`)}
-                                       
-                                          className="absolute right-2 inset-y-0 p-1 text-slate-400 hover:text-white"
-                                          title="Copy URL"
-                                        >
-                                          {copied ? (
-                                            <AiOutlineCheck className="text-green-400" />
-                                          ) : (
-                                            <AiOutlineCopy />
-                                          )}
-                                        </button>
-                                      </div>
+                                  <div>
+                                    <p className="text-xs text-slate-400">Size</p>
+                                    <p className="text-sm text-white">
+                                      {formatFileSize(item.file_size)}
+                                    </p>
+                                  </div>
+                                </div>
+                                {/* URL with copy */}
+                                <div className="mt-3">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs text-slate-400">
+                                      Copy ID:
+                                    </span>
+                                    <div className="relative flex-1">
+                                      <input
+                                        type="text"
+                                        value={item.id}
+                                        readOnly
+                                        className="w-full bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-green-400"
+                                      />
+                                      <button
+                                        onClick={() =>
+                                          handleCopy(`${item.id}`, "ID copied")
+                                        }
+                                        className="absolute right-2 inset-y-0 p-1 text-slate-400 hover:text-white"
+                                        title="Copy ID"
+                                      >
+                                        {copied ? (
+                                          <AiOutlineCheck className="text-green-400" />
+                                        ) : (
+                                          <AiOutlineCopy />
+                                        )}
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-
-                              {/* Action buttons */}
-                              <div className="flex gap-2 mt-4">
-                                <button
-                                  onClick={() =>
-                                    window.open(item.file_url, "_blank")
-                                  }
-                                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
-                                >
-                                  <AiOutlineEye />
-                                  <span>Preview</span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    const link = document.createElement("a");
-                                    link.href = item.file_url;
-                                    link.download = item.file_name;
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-                                  }}
-                                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
-                                >
-                                  <AiOutlineCloudDownload />
-                                  <span>Download</span>
-                                </button>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                  </>
-                )}
-
-                {activeTab === "text" && (
-                  <>
-                    {isTextUpload &&
-                      data.map((item, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
-                        >
-                          <div className="flex items-center gap-2 mb-3">
-                            <AiOutlineFileText className="text-green-400" />
-                            <h3 className="text-white font-medium text-lg">
-                              {item.title || `Text Snippet ${index + 1}`}
-                            </h3>
-                          </div>
-
-                          {/* Code/Content display */}
-                          <div className="relative bg-slate-900 rounded-lg p-4 mb-4 overflow-x-auto">
-                            <pre className="text-sm text-slate-300 whitespace-pre-wrap">
-                              {item.content}
-                            </pre>
-                            <button
-                              onClick={() => copyToClipboard(item.content)}
-                              className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-all"
-                              title="Copy to clipboard"
-                            >
-                              {copied ? (
-                                <AiOutlineCheck className="text-green-400" />
-                              ) : (
-                                <AiOutlineCopy />
-                              )}
-                            </button>
-                          </div>
-
-                          {/* Action buttons */}
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => copyToClipboard(item.content)}
-                              className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
-                            >
-                              <AiOutlineCopy />
-                              <span>Copy</span>
-                            </button>
-                            {item.file_url && (
+                            {/* Action buttons */}
+                            <div className="flex gap-2 mt-4">
                               <button
                                 onClick={() =>
-                                  window.open(item.file_url, "_blank")
+                                  window.open(`${FrontendURL}/view/${item.id}`, "_blank")
                                 }
                                 className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
                               >
-                                <AiOutlineLink />
-                                <span>Open</span>
+                                <AiOutlineEye />
+                                <span>Preview</span>
                               </button>
-                            )}
+                              <button
+                                onClick={() =>
+                                  handleCopy(
+                                    `${FrontendURL}/view/${item.id}`,
+                                    "Link copied"
+                                  )
+                                }
+                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
+                              >
+                                <Copy className="w-4 h-4 " />
+                                <span>Copy Link</span>
+                              </button>
+                            </div>
                           </div>
-                        </motion.div>
-                      ))}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </>
+                )}
+
+                {/* Text Upload Layout */}
+                {isTextUpload && (
+                  
+                  <>
+                    {data.map((item, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-slate-700/50 rounded-lg p-4 border border-slate-600"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <AiOutlineFileText className="text-green-400" />
+                          <h3 className="text-white font-medium text-lg">
+                            {item.title || `Text Snippet ${index + 1}`}
+                          </h3>
+                        </div>
+                        <div className="relative bg-slate-900 rounded-lg p-4 mb-4 overflow-x-auto">
+                        <pre className="text-sm text-slate-300 whitespace-pre-wrap">
+  {item.content.length > 30
+    ? item.content.slice(0, 21) + "..."
+    : item.content}
+</pre>
+
+
+ <div className="mt-3">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs text-slate-400">
+                                      Copy ID:
+                                    </span>
+                                    <div className="relative flex-1">
+                                      <input
+                                        type="text"
+                                        value={item.id}
+                                        readOnly
+                                        className="w-full bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-green-400"
+                                      />
+                                      <button
+                                        onClick={() =>
+                                          handleCopy(`${item.id}`, "ID copied")
+                                        }
+                                        className="absolute right-2 inset-y-0 p-1 text-slate-400 hover:text-white"
+                                        title="Copy ID"
+                                      >
+                                        {copied ? (
+                                          <AiOutlineCheck className="text-green-400" />
+                                        ) : (
+                                          <AiOutlineCopy />
+                                        )}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                          {/* <button
+                            onClick={() => copyToClipboard(item.content)}
+                            className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-all"
+                            title="Copy to clipboard"
+                          >
+                            {copied ? (
+                              <AiOutlineCheck className="text-green-400" />
+                            ) : (
+                              <AiOutlineCopy />
+                            )}
+                          </button> */}
+                        </div>
+                        {/* Action buttons */}
+                        <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() =>
+                                  window.open(`${FrontendURL}/view/${item.id}`, "_blank")
+                                }
+                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
+                              >
+                                <AiOutlineEye />
+                                <span>Preview</span>
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleCopy(
+                                    `${FrontendURL}/view/${item.id}`,
+                                    "Link copied"
+                                  )
+                                }
+                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
+                              >
+                                <Copy className="w-4 h-4 " />
+                                <span>Copy Link</span>
+                              </button>
+                            </div>
+                      </motion.div>
+                      
+                    ))}
                   </>
                 )}
               </div>

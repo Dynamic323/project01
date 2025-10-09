@@ -5,7 +5,8 @@ const validateUpload = (req, res, next) => {
   const { text, type } = req.body;
   const file = req.files;
 
-  const maxSize = 10 * 1024 * 1024; // 10MB
+const maxSize = 40 * 1024 * 1024; // 40 MB
+
 
   if (!text && !file) {
     return res

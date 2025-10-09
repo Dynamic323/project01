@@ -38,7 +38,7 @@ function User_Layout() {
     }, 600);
   }, [location]);
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   const sidebarItems = [
     {
@@ -89,7 +89,7 @@ function User_Layout() {
         <div className="flex  bg-slate-900">
           {/* Sidebar */}
           <div
-            className={` h-screen  ${
+            className={` h-screen   ${
               sidebarCollapsed ? "w-10 md:w-20" : "w-44 md:w-64"
             } bg-slate-800 border-r border-slate-700 transition-all duration-300 ease-in-out flex flex-col`}
           >
@@ -172,7 +172,7 @@ function User_Layout() {
               </ul>
             </nav>
           </div>
-          <div className="w-full">
+          <div className="w-full ">
             <Outlet />
           </div>
         </div>
