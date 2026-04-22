@@ -102,7 +102,10 @@ function App() {
       <Hero />
 
       {/* Interactive Demo Section */}
-      <section id="demo" className="py-16 md:py-24 bg-gradient-to-b from-slate-800 to-slate-900">
+      <section
+        id="demo"
+        className="py-16 md:py-24 bg-gradient-to-b from-slate-800 to-slate-900"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 md:mb-4">
@@ -117,7 +120,10 @@ function App() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 md:py-24 bg-gradient-to-b from-slate-900 to-slate-800">
+      <section
+        id="features"
+        className="py-16 md:py-24 bg-gradient-to-b from-slate-900 to-slate-800"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 md:mb-4">
@@ -185,7 +191,9 @@ function App() {
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
                   {item.title}
                 </h3>
-                <p className="text-slate-400 text-sm md:text-base">{item.desc}</p>
+                <p className="text-slate-400 text-sm md:text-base">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -263,16 +271,25 @@ function App() {
                 <div className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-red-400 to-red-500 text-white font-bold text-sm md:text-lg">
                   <AiOutlineCloudUpload className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
-                <span className="font-bold text-lg md:text-xl text-white">DyshareX</span>
+                <span className="font-bold text-lg md:text-xl text-white">
+                  DyshareX
+                </span>
               </div>
               <p className="text-slate-400 text-sm mb-3 md:mb-4">
-                The easiest way to share files with anyone, anywhere. Upload once, share everywhere.
+                The easiest way to share files with anyone, anywhere. Upload
+                once, share everywhere.
               </p>
               <div className="flex items-center gap-3 md:gap-4">
-                <a href="#" className="text-slate-400 hover:text-red-400 transition-colors">
+                <a
+                  href="#"
+                  className="text-slate-400 hover:text-red-400 transition-colors"
+                >
                   <AiOutlineGithub className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-slate-400 hover:text-red-400 transition-colors">
+                <a
+                  href="#"
+                  className="text-slate-400 hover:text-red-400 transition-colors"
+                >
                   <AiOutlineTwitter className="h-5 w-5" />
                 </a>
               </div>
@@ -281,17 +298,26 @@ function App() {
               <h3 className="text-white font-semibold mb-3 md:mb-4">Product</h3>
               <ul className="space-y-1.5 md:space-y-2">
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-red-400 text-sm transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-red-400 text-sm transition-colors"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-red-400 text-sm transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-red-400 text-sm transition-colors"
+                  >
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-red-400 text-sm transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-red-400 text-sm transition-colors"
+                  >
                     API
                   </a>
                 </li>
@@ -301,17 +327,26 @@ function App() {
               <h3 className="text-white font-semibold mb-3 md:mb-4">Support</h3>
               <ul className="space-y-1.5 md:space-y-2">
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-red-400 text-sm transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-red-400 text-sm transition-colors"
+                  >
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-red-400 text-sm transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-red-400 text-sm transition-colors"
+                  >
                     Contact Us
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-slate-400 hover:text-red-400 text-sm transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-400 hover:text-red-400 text-sm transition-colors"
+                  >
                     Privacy Policy
                   </a>
                 </li>
