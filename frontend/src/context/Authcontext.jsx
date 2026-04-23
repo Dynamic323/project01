@@ -1,76 +1,56 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  createUserWithEmailAndPassword,
-  GithubAuthProvider,
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut,
-  updateEmail,
-  updateProfile,
-} from "firebase/auth";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  serverTimestamp,
-} from "firebase/firestore";
-import { auth, db } from "../firebase/config";
+import { db } from "../lib/cocobase";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  //  Restore session on refresh
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
+    const init = async () => {
+      try {
+        await db.auth.initAuth();
         try {
-          const userRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userRef);
-          let userData = {};
-          if (userSnap.exists()) {
-            userData = userSnap.data();
+          const currentUser = await db.auth.getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            localStorage.setItem(
+              "user",
+              JSON.stringify({
+                uid: currentUser.id,
+                email: currentUser.email,
+                displayName: currentUser.displayName,
+              }),
+            );
           }
-
-          setUser({
-            authUser: currentUser, 
-            ...userData,            
-          });
-
-          const token = await currentUser.getIdToken();
-          localStorage.setItem(
-            "user",
-            JSON.stringify({
-              uid: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName,
-              token,
-            })
-          );
-        } catch (err) {
-          console.error("Error fetching user:", err);
+        } catch {
+          // No active session, that's fine
+          setUser(null);
+          localStorage.removeItem("user");
         }
-      } else {
-        localStorage.removeItem("user");
+      } catch (err) {
+        console.error("Auth init error:", err);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
-    return unsubscribe;
+    };
+    init();
   }, []);
 
+  //  Register
   const register = async (email, password, name) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const authUser = userCredential.user;
-    await updateProfile(authUser, { displayName: name });
+    const res = await db.auth.register({
+      email,
+      password,
+      displayName: name,
+    });
 
-    await setDoc(doc(db, "users", authUser.uid), {
-      name,
-      email: authUser.email,
+    const currentUser = await db.auth.getCurrentUser();
+
+    const newUser = {
+      ...currentUser,
       UserPlan: "free",
       isPublic: true,
       defaultType: "text",
@@ -78,66 +58,77 @@ export const AuthProvider = ({ children }) => {
       emailNotifications: true,
       fileActivityAlerts: false,
       profileImage: "",
-      createdAt: serverTimestamp(),
-    });
+    };
 
-    setUser({
-      authUser,
-      name,
-      email: authUser.email,
-      UserPlan: "free",
-      isPublic: true,
-      defaultType: "text",
-      allowAnalytics: true,
-      emailNotifications: true,
-      fileActivityAlerts: false,
-      profileImage: "",
-    });
+    setUser(newUser);
 
-    return authUser;
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        uid: currentUser.id,
+        email: currentUser.email,
+        displayName: currentUser.displayName,
+      }),
+    );
+
+    return res;
   };
 
-  const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  // Login
+  const login = async (email, password) => {
+    const res = await db.auth.login({ email, password });
 
-  const logout = () => {
+    const currentUser = await db.auth.getCurrentUser();
+
+    setUser(currentUser);
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        uid: currentUser.id,
+        email: currentUser.email,
+        displayName: currentUser.displayName,
+      }),
+    );
+
+    return res;
+  };
+
+  // Logout
+  const logout = async () => {
+    await db.auth.logout();
+    setUser(null);
     localStorage.removeItem("user");
-    return signOut(auth);
   };
 
-  const googleSignin = () => {
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
-  };
-
-  const githubSignIn = () => {
-    const provider = new GithubAuthProvider();
-    return signInWithPopup(auth, provider);
-  };
-
-  const updateUserEmail = async (newEmail) => {
-    if (!user?.authUser) throw new Error("No user logged in");
-
-    await updateEmail(user.authUser, newEmail);
-    await updateDoc(doc(db, "users", user.authUser.uid), { email: newEmail });
-    setUser((prev) => ({ ...prev, email: newEmail }));
-  };
-
-  const updateUserDisplayName = async (newDisplayName) => {
-    if (!user?.authUser) throw new Error("No user logged in");
-
-    await updateProfile(user.authUser, { displayName: newDisplayName });
-    await updateDoc(doc(db, "users", user.authUser.uid), { name: newDisplayName });
-    setUser((prev) => ({ ...prev, displayName: newDisplayName, name: newDisplayName }));
-  };
-
+  //  Update profile (email/name/settings)
   const updateUserSettings = async (updates) => {
-    if (!user?.authUser) throw new Error("No user logged in");
+    if (!user) throw new Error("No user logged in");
 
-    const userRef = doc(db, "users", user.authUser.uid);
-    await updateDoc(userRef, updates);
-    setUser((prev) => ({ ...prev, ...updates }));
+    const updatedUser = await db.auth.updateUser(updates);
+
+    setUser((prev) => ({
+      ...prev,
+      ...updatedUser,
+    }));
   };
 
+  const googleSignin = async (id_token) => {
+    console.log("See the ID toeken ooo", id_token);
+
+    if (!id_token) throw new Error("No Google token received");
+
+    const res = await db.auth.loginWithGoogle({
+      idToken: id_token,
+      platform: "web",
+    });
+
+    const currentUser = await db.auth.getCurrentUser();
+
+    setUser(currentUser);
+
+    return res;
+  };
   return (
     <AuthContext.Provider
       value={{
@@ -146,11 +137,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        googleSignin,
-        githubSignIn,
-        updateUserEmail,
-        updateUserDisplayName,
         updateUserSettings,
+        googleSignin,
       }}
     >
       {!loading && children}

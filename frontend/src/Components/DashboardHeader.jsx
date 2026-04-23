@@ -6,7 +6,7 @@ import {
   AiOutlineSetting,
   AiOutlineLogout,
   AiOutlineDown,
-  AiOutlineUp
+  AiOutlineUp,
 } from "react-icons/ai";
 
 const DashboardHeader = () => {
@@ -35,7 +35,9 @@ const DashboardHeader = () => {
     const displayName = user.displayName || user.name || "";
     const names = displayName.split(" ");
     if (names.length > 1) {
-      return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+      return (
+        names[0].charAt(0) + names[names.length - 1].charAt(0)
+      ).toUpperCase();
     }
     return displayName.charAt(0).toUpperCase();
   };
@@ -66,7 +68,8 @@ const DashboardHeader = () => {
 
             {/* User Avatar with Initials */}
             <div className="w-9 h-9 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-              {getInitials()}
+              {/* {getInitials()} */}
+              <img src={`${user.picture}`} alt="" />
             </div>
 
             {/* Dropdown Arrow */}

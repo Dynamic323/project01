@@ -8,7 +8,8 @@ import {
   AiOutlinePicture,
 } from "react-icons/ai";
 import { Code, Text } from "lucide-react";
-import { BackendURL } from "../utils/file-helper";
+
+const BackendURL = import.meta.env.VITE_BACKEND_URL;
 
 function Recent_files() {
   const { getValue, setValue } = useDashboard();
@@ -22,18 +23,21 @@ function Recent_files() {
         setloading(true);
 
         try {
+          console.log(user);
+          
           const res = await fetch(
-            `${BackendURL}/api/user/all/${user.authUser.uid}`
+            `${BackendURL}/api/user/all/${user.id}`,
           );
           const response = await res.json();
-
+            
           const data = response.uploads.slice(1, 4);
           setValue(
             "user-mini-history",
-            Array.isArray(data) ? data : data.files || []
+            Array.isArray(data) ? data : data.files || [],
           );
         } catch (err) {
           toast.error("Error in getting History....");
+
           setValue("user-mini-history", []);
         } finally {
           setloading(false);
@@ -103,7 +107,7 @@ function Recent_files() {
             </div>
           </div>
           {loading ? (
-           <h1 className="p-3"> Loading</h1>
+            <h1 className="p-3"> Loading</h1>
           ) : (
             <div className="divide-y divide-slate-600">
               {history.map((item, index) => (

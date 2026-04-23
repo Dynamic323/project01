@@ -4,11 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Authcontext";
 import { toast, ToastContainer } from "react-toastify";
 import Spinner from "../../../Components/Spinner";
+import { cocobaseError } from "../../../lib/hrlper";
 
 function Login() {
-  const { login, googleSignin, githubSignIn ,user} = useAuth();
+  const { login, googleSignin, githubSignIn, user } = useAuth();
   const navigate = useNavigate();
-   useEffect(() => {
+  useEffect(() => {
     if (user) {
       navigate("/dashboard");
     }
@@ -18,16 +19,55 @@ function Login() {
     password: "",
     email: "",
   });
-  const handleGoogle = async () => {
+  const handleGoogleResponse = async (response) => {
+    console.log("Full response object:", JSON.stringify(response));
+
+    if (!response?.credential) {
+      toast.error("Google did not return a credential");
+      return;
+    }
     try {
-      await googleSignin();
+      setloading(true);
+
+      console.log("Google response:", response);
+
+      if (!response?.credential) {
+        throw new Error("Missing Google credential");
+      }
+
+      await googleSignin(response.credential);
 
       toast.success("Logged in with Google!");
       navigate("/dashboard");
     } catch (err) {
-      toast.error("Google login failed");
+      console.error("Google Auth Error:", err);
+      cocobaseError(err);
+    } finally {
+      setloading(false);
     }
   };
+  useEffect(() => {
+    if (window.google) return;
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-btn"),
+        { theme: "outline", size: "large" },
+      );
+    };
+
+    document.body.appendChild(script);
+  }, []);
 
   const handleGithub = async () => {
     try {
@@ -73,12 +113,16 @@ function Login() {
       setloading(true);
       await login(email, password);
       setloading(false);
-toast.success("Logged in successfully! Welcome back 👋");
+      toast.success("Logged in successfully! Welcome back 👋");
       navigate("/dashboard");
     } catch (error) {
       setloading(false);
-      toast.error(`${error}`);
-      console.error(error);
+      const strErr = JSON.parse(
+        error.toString().replace("Error: Request failed:", ""),
+      );
+      toast.error(`${strErr.error.detail}`);
+
+      // console.error(strErr.error.detail);
     }
   };
 
@@ -121,7 +165,7 @@ toast.success("Logged in successfully! Welcome back 👋");
             </span>
 
             <div className="flex gap-3 sm:gap-4 items-center my-3 sm:my-4">
-              <button
+              {/* <button
                 type="button"
                 onClick={handleGoogle}
                 className="w-[50%] py-2 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-xl flex justify-center items-center transition-colors"
@@ -149,7 +193,9 @@ toast.success("Logged in successfully! Welcome back 👋");
                     d="M43.6 20.5H42V20H24v8h11.3C34.5 31.7 29.7 35 24 35c-5.1 0-9.4-2.6-11.6-6.5l-6.5 5C9.5 38.3 16.2 43 24 43c9.8 0 18-7.1 18-19 0-1.3-.1-2.4-.4-3.5z"
                   />
                 </svg>
-              </button>
+              </button> */}
+
+              <div id="google-btn" className="w-[50%]"></div>
               <button
                 type="button"
                 onClick={handleGithub}
@@ -178,7 +224,8 @@ toast.success("Logged in successfully! Welcome back 👋");
             <span className="block text-center text-slate-400 text-xs sm:text-sm">
               Don't have an Account ?
               <Link to="/register">
-                <span><br />
+                <span>
+                  <br />
                   <i className="text-red-400 mt-2 underline hover:text-red-300 transition-colors">
                     Create new account
                   </i>

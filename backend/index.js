@@ -1,17 +1,11 @@
-// index.js
 require("dotenv").config();
 const express = require("express");
-const app = express();
-const uploadRoutes = require("./routes/uploadRoutes");
-const userHistory = require("./routes/userHistory");
-const viewRoutes = require("./routes/viewRoutes");
-const deleteRoutes = require("./routes/deleteRoutes");
-const userStorageInfo = require("./routes/userStorageInfo");
 const cors = require("cors");
+const app = express();
 
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(
   cors({
     origin: [
@@ -20,19 +14,18 @@ app.use(
       "https://dysharex.pxxl.click",
     ],
     credentials: true,
-  })
+  }),
 );
 
-app.use("/api", uploadRoutes);
-app.use("/api", viewRoutes);
-app.use("/api", deleteRoutes);
-app.use("/api", userHistory);
-app.use("/api", userStorageInfo);
+// Routes
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/uploads", require("./routes/uploadRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 
-// Root
-app.get("/", (req, res) => {
-  res.send("DyShareX Backend is Running ✅");
-});
+app.get("/", (req, res) =>
+  res.send("DyShareX Backend is Running ✅ yes na me add the emoji looks cool"),
+);
 
-const PORT = process.env.DATABASE_URL || 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

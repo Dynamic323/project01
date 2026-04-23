@@ -46,10 +46,12 @@ function Register() {
       navigate("/dashboard");
     } catch (error) {
       setLoading(false);
-      // Extract the Firebase error message and toast it
-      const errorMessage = error.message || "Registration failed";
-      toast.error(errorMessage);
-      console.error(error);
+      const strErr = JSON.parse(
+        error.toString().replace("Error: Request failed:", ""),
+      );
+      toast.error(`${strErr.error.detail}`);
+
+      // console
     }
   };
 
