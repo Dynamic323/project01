@@ -34,7 +34,7 @@ export function StoragePage() {
   const { getValue, setValue } = dashboard;
   const service = apiService(dashboard);
 
-  const initialData = getValue(`user_storage_stats_${user?.id}`);
+  const initialData = getValue(`user_storage_stats`);
   const [loading, setLoading] = useState(!initialData);
   const storageData = initialData || null;
 
@@ -44,10 +44,11 @@ export function StoragePage() {
         setLoading(true);
         try {
           const token = localStorage.getItem("token");
-          await service.getUserStorage(user.id, token);
+          const data = await service.getUserStorage(user.id, token);
+          console.log(data);
         } catch (err) {
           handleApiError(err);
-          setValue(`user_storage_stats_${user.id}`, null);
+          setValue(`user_storage_stats`, null);
         } finally {
           setLoading(false);
         }
@@ -56,12 +57,7 @@ export function StoragePage() {
     fetchStorage();
   }, [user.id, initialData, service]);
 
-  if (loading)
-    return (
-      <Subloader
-        text={"Loading Storage info...."}
-      />
-    );
+  if (loading) return <Subloader text={"Loading Storage info...."} />;
   if (!storageData)
     return <div className="p-8 text-red-400">Failed to load storage.</div>;
 
@@ -138,8 +134,9 @@ export function StoragePage() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-4 h-4 rounded ${typeColors[ft.type] || "bg-gray-500"
-                          }`}
+                        className={`w-4 h-4 rounded ${
+                          typeColors[ft.type] || "bg-gray-500"
+                        }`}
                       />
                       <span className="text-white">{ft.type}</span>
                     </div>

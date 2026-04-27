@@ -18,7 +18,7 @@ function Recent_files() {
   const dashboard = useDashboard();
   const { getValue, setValue } = dashboard;
   const [loading, setloading] = useState(false);
-  const history = getValue("user_uploads_all") || []; // Updated cache key
+  const history = getValue("user_uploads_all") || [];
   const { user } = useAuth();
   const service = apiService(dashboard);
 
@@ -29,10 +29,10 @@ function Recent_files() {
         try {
           const token = localStorage.getItem("token");
           const data = await service.getUserAll(user.id, token);
-          // The service already calls setValue, but we want to slice it for "recent"
-          // Actually, let's just use the cached data and slice it in the render or here.
-          // For "recent", we might want a separate cache key or just use the main one.
-          // Let's just use the main one for now.
+
+          console.log(data);
+
+          setValue("user_uploads_all", data.uploads);
         } catch (err) {
           handleApiError(err);
         } finally {
