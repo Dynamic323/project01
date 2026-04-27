@@ -1,9 +1,11 @@
 const pool = require("../config/db");
 
 exports.getUserUploadHistory = async (req, res) => {
-  const { userId } = req.params;
+  const userId = req.user.id;
+  console.log(req);
+  
   if (!userId) {
-    return res.status(400).json({ error: "User ID is required" });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
   try {

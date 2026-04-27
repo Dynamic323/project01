@@ -51,7 +51,7 @@ export function Dropzone() {
   const [abortController, setAbortController] = useState(null);
 
   const navigate = useNavigate();
-  const { uploading, error, success, uploadFile } = useUploader("/api/upload");
+  const { uploading, error, success, uploadFile } = useUploader();
 
   // Block navigation if there are unsaved changes
   useEffect(() => {
@@ -239,11 +239,6 @@ export function Dropzone() {
       setAbortController(controller);
       let response = null;
 
-      const userData = localStorage.getItem("user");
-      const parsedUser = userData ? JSON.parse(userData) : {};
-      const userId = parsedUser?.uid || "Guest";
-console.log(userId);
-
       if (files.length != 0) {
         response = await uploadFile(
           {
@@ -252,7 +247,6 @@ console.log(userId);
             type: "file",
             expiresAt,
             isPublic,
-            user_id: userId,
           },
           { signal: controller.signal }
         );
@@ -264,7 +258,6 @@ console.log(userId);
             type: contentType,
             expiresAt,
             isPublic,
-            user_id: userId,
           },
           { signal: controller.signal }
         );

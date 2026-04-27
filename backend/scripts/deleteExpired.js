@@ -1,5 +1,5 @@
 // scripts/deleteExpired.js
-require("dotenv").config();
+require('../config/env'); // at top of index.js, etc.   
 const pool = require("../config/db");
 
 const deleteExpiredUploads = async () => {

@@ -1,8 +1,8 @@
 const cloudinary = require("cloudinary").v2;
 
-const dotenv = require("dotenv");
+// Environment variables are loaded in index.js via config/env.js
 
-dotenv.config();
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

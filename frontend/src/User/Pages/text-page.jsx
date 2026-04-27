@@ -16,9 +16,13 @@ import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Loader, { Subloader } from "../../Components/Loader";
-import {BackendURL} from "../../utils/file-helper"
+import { BackendURL } from "../../utils/file-helper";
+import apiService from "../../services/apiService";
+import { handleApiError } from "../../lib/hrlper";
+
 export default function TextPage() {
-  const { getValue, setValue } = useDashboard();
+  const dashboard = useDashboard();
+  const { getValue, setValue } = dashboard;
   const [loading, setLoading] = useState(false);
   const [texts, setTexts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,37 +32,30 @@ export default function TextPage() {
   const [textToDelete, setTextToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
-  
-  // Memoized data fetching
-  // Text-page.jsx
   const { user } = useAuth();
-  const cachedText = getValue("texts")
+  const service = apiService(dashboard);
+
+  const cachedText = getValue("user_uploads_texts");
 
   const fetchTexts = useCallback(async () => {
-   
-    if (!cachedText) {
-      setLoading(true)
+    if (!cachedText && user) {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const data = await service.getUserTexts(user.id, token);
 
-       try {
-        const res = await fetch(
-          `${BackendURL}/api/user/text/${user.authUser.uid}?page=1&limit=${itemsPerPage}&search=`
-        );
-        const data = await res.json();
-
-        const textData = Array.isArray(data) ? data : data.texts || [];
-        setTexts(textData);
-        setValue("texts", textData);
+        setTexts(data.texts ?? []);
       } catch (err) {
-        toast.error("Error fetching texts");
-        console.error(err);
-        setTexts([]);
-        setValue("texts", []);
+        handleApiError(err);
       } finally {
         setLoading(false);
       }
-
+    } else if (cachedText) {
+      setTexts(
+        Array.isArray(cachedText) ? cachedText : (cachedText.texts ?? []),
+      );
     }
-  }, [user, BackendURL, getValue, setValue, itemsPerPage]);
+  }, [user, service, cachedText]);
 
   useEffect(() => {
     fetchTexts();
@@ -69,22 +66,20 @@ export default function TextPage() {
     setCurrentPage(1);
   };
 
-  // Filter texts based on search term
   const filteredTexts = useMemo(() => {
     return texts.filter(
       (txt) =>
         txt.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        txt.content?.toLowerCase().includes(searchTerm.toLowerCase())
+        txt.content?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [texts, searchTerm]);
 
-  // Pagination logic
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentTexts = filteredTexts.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredTexts.length / itemsPerPage);
 
-  const formatDate = (dateString) =>    
+  const formatDate = (dateString) =>
     new Date(dateString).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -97,21 +92,19 @@ export default function TextPage() {
   };
 
   const handleDelete = async (id) => {
+    if (!user) return;
     setIsDeleting(true);
     try {
-      const res = await fetch(`${BackendURL}/api/text/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        const updated = texts.filter((t) => t.id !== id);
-        setTexts(updated);
-        setValue("texts", updated);
-        toast.success("Text deleted");
-        setShowConfirm(false);
-      } else throw new Error();
+      const token = localStorage.getItem("token");
+      await service.deleteUpload(id, token);
+
+      const updated = texts.filter((t) => t.id !== id);
+      setTexts(updated);
+      setValue("user_uploads_texts", updated);
+      toast.success("Text deleted successfully");
+      setShowConfirm(false);
     } catch (err) {
-      toast.error("Error deleting text");
-      console.error(err);
+      handleApiError(err);
     } finally {
       setIsDeleting(false);
     }
@@ -203,7 +196,10 @@ export default function TextPage() {
               View and manage all your saved text snippets
             </p>
           </div>
-          <Link to={"/dashboard/dropzone?mode=text"} className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors">
+          <Link
+            to={"/dashboard/dropzone?mode=text"}
+            className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors"
+          >
             <AiOutlinePlus className="h-4 w-4" />
             Create New Text
           </Link>
@@ -222,8 +218,7 @@ export default function TextPage() {
       </div>
       {/* Text List */}
       {loading ? (
-       <Subloader text={"Loading Text...."} />
-
+        <Subloader text={"Loading Text...."} />
       ) : currentTexts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentTexts.map((txt) => (
@@ -296,7 +291,10 @@ export default function TextPage() {
           <p className="mb-4">
             No texts found{searchTerm ? ` matching "${searchTerm}"` : ""}.
           </p>
-          <Link  to={"/dashboard/dropzone?mode=text"} className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors mx-auto">
+          <Link
+            to={"/dashboard/dropzone?mode=text"}
+            className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors mx-auto"
+          >
             <AiOutlinePlus className="h-4 w-4" />
             Create Your First Text
           </Link>

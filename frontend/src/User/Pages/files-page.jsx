@@ -23,11 +23,15 @@ import {
 import { LazyImage } from "../../Components/LazyImage";
 import { Pagination } from "../../Components/Pagination";
 import { Subloader } from "../../Components/Loader";
-import { handleDelete } from "../../utils/Helper_Function";
+// import { handleDelete } from "../../utils/Helper_Function";
+
+import apiService from "../../services/apiService";
+import { handleApiError } from "../../lib/hrlper";
 
 export function FilesPage() {
   const { user } = useAuth();
-  const { getValue, setValue } = useDashboard();
+  const dashboard = useDashboard();
+  const { getValue, setValue } = dashboard;
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,36 +40,29 @@ export function FilesPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const navigate = useNavigate();
+  const service = apiService(dashboard);
 
   // Get files from context
-  const files = getValue("files") || [];
+  const files = getValue("user_uploads_files") || [];
 
-  const fetchFiles = async (page = 1, search = "") => {
-    
-    if (!user?.authUser.uid) return;
-    console.log(files);
-    
+const fetchFiles = async () => {
+  if (!user?.id) return;
 
-   if (files.length <= 0) {
-     setLoading(true);
-    try {
-      const res = await fetch(
-        `${BackendURL}/api/user/files/${user.authUser.uid}?page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}`
-      );
+  const cached = getValue("user_uploads_files");
+  if (cached?.length > 0) return; // already have data
 
-      if (!res.ok) throw new Error("Failed to fetch files");
-      const data = await res.json();
-      setTotalPages(data.pagination?.totalPages || 1);
-      setValue("files", data.files || []);
-    } catch (err) {
-      toast.error("Error fetching files");
-      console.error(err);
-      setValue("files", []);
-    } finally {
-      setLoading(false);
-    }
-   }
-  };
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const data = await service.getUserFiles(user.id, token);
+    const fileList = data.files ?? [];
+    setValue("user_uploads_files", fileList); 
+  } catch (err) {
+    handleApiError(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchFiles(currentPage, searchTerm);
@@ -74,25 +71,23 @@ export function FilesPage() {
   const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
 
   const handleDeleteItem = async () => {
-    if (!fileToDelete) return;
+    if (!fileToDelete || !user) return;
 
     try {
-      const success = await handleDelete(fileToDelete.id, "file");
-      if (success) {
-        // Update context value by filtering out the deleted file
-        const currentFiles = getValue("files") || [];
-        setValue(
-          "files",
-          currentFiles.filter(file => file.id !== fileToDelete.id)
-        );
-        setShowConfirm(false);
-      }
+      const token = localStorage.getItem("token");
+      await service.deleteUpload(fileToDelete.id, token);
+
+      const currentFiles = getValue("user_uploads_files") || [];
+      setValue(
+        "user_uploads_files",
+        currentFiles.filter((file) => file.id !== fileToDelete.id),
+      );
+      setShowConfirm(false);
+      toast.success("File deleted successfully");
     } catch (err) {
-      toast.error("Failed to delete file");
-      console.error(err);
+      handleApiError(err);
     }
   };
-
   return (
     <div className="p-3 sm:p-6 md:p-8">
       {/* Header */}
@@ -103,7 +98,10 @@ export function FilesPage() {
           </h1>
           <p className="text-slate-400">Manage all your uploaded files</p>
         </div>
-        <Link to={"/dashboard/dropzone"} className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500">
+        <Link
+          to={"/dashboard/dropzone"}
+          className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500"
+        >
           <AiOutlinePlus className="h-4 w-4" /> Upload New File
         </Link>
       </div>

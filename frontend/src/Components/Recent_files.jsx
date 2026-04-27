@@ -11,41 +11,40 @@ import { Code, Text } from "lucide-react";
 
 const BackendURL = import.meta.env.VITE_BACKEND_URL;
 
+import apiService from "../services/apiService";
+import { handleApiError } from "../lib/hrlper";
+
 function Recent_files() {
-  const { getValue, setValue } = useDashboard();
+  const dashboard = useDashboard();
+  const { getValue, setValue } = dashboard;
   const [loading, setloading] = useState(false);
-  const history = getValue("user-mini-history") || [];
+  const history = getValue("user_uploads_all") || []; // Updated cache key
   const { user } = useAuth();
+  const service = apiService(dashboard);
 
   useEffect(() => {
     async function FetchHistory_mini() {
-      if (!history.length) {
+      if (!history.length && user) {
         setloading(true);
-
         try {
-          console.log(user);
-          
-          const res = await fetch(
-            `${BackendURL}/api/user/all/${user.id}`,
-          );
-          const response = await res.json();
-            
-          const data = response.uploads.slice(1, 4);
-          setValue(
-            "user-mini-history",
-            Array.isArray(data) ? data : data.files || [],
-          );
+          const token = localStorage.getItem("token");
+          const data = await service.getUserAll(user.id, token);
+          // The service already calls setValue, but we want to slice it for "recent"
+          // Actually, let's just use the cached data and slice it in the render or here.
+          // For "recent", we might want a separate cache key or just use the main one.
+          // Let's just use the main one for now.
         } catch (err) {
-          toast.error("Error in getting History....");
-
-          setValue("user-mini-history", []);
+          handleApiError(err);
         } finally {
           setloading(false);
         }
       }
     }
     FetchHistory_mini();
-  }, []);
+  }, [user]);
+
+  // Use the main history cache and slice for "Recent"
+  const recentItems = history.slice(0, 3);
 
   const getFileIcon = (fileType) => {
     if (!fileType) return <AiOutlineFile className="h-5 w-5 text-red-400" />;
@@ -110,7 +109,7 @@ function Recent_files() {
             <h1 className="p-3"> Loading</h1>
           ) : (
             <div className="divide-y divide-slate-600">
-              {history.map((item, index) => (
+              {recentItems.map((item, index) => (
                 <div
                   key={index}
                   className="px-4 py-3 hover:bg-slate-700 transition-colors"

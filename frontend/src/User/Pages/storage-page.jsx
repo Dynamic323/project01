@@ -25,35 +25,36 @@ function formatMB(mb) {
   return `${n.toFixed(2)} MB`;
 }
 
+import apiService from "../../services/apiService";
+import { handleApiError } from "../../lib/hrlper";
+
 export function StoragePage() {
   const { user } = useAuth();
+  const dashboard = useDashboard();
+  const { getValue, setValue } = dashboard;
+  const service = apiService(dashboard);
 
-  const { getValue, setValue } = useDashboard();
-
-  const initialData = getValue("user-storageData");
+  const initialData = getValue(`user_storage_stats_${user?.id}`);
   const [loading, setLoading] = useState(!initialData);
   const storageData = initialData || null;
+
   useEffect(() => {
     async function fetchStorage() {
-      if (!initialData) {
+      if (!initialData && user) {
+        setLoading(true);
         try {
-          const res = await fetch(
-            `${BackendURL}/api/storage-info/${user.authUser.uid}`
-          );
-          const data = await res.json();
-          setValue("user-storageData", data);
-          console.log(data);
+          const token = localStorage.getItem("token");
+          await service.getUserStorage(user.id, token);
         } catch (err) {
-          toast.error("Failed to fetch storage details");
-          console.error("Failed to fetch storage:", err);
-          setValue("user-storageData", {});
+          handleApiError(err);
+          setValue(`user_storage_stats_${user.id}`, null);
         } finally {
           setLoading(false);
         }
       }
     }
     fetchStorage();
-  }, [user.uid, setValue, initialData]);
+  }, [user.id, initialData, service]);
 
   if (loading)
     return (
@@ -137,9 +138,8 @@ export function StoragePage() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-4 h-4 rounded ${
-                          typeColors[ft.type] || "bg-gray-500"
-                        }`}
+                        className={`w-4 h-4 rounded ${typeColors[ft.type] || "bg-gray-500"
+                          }`}
                       />
                       <span className="text-white">{ft.type}</span>
                     </div>

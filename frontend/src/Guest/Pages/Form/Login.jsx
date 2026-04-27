@@ -4,10 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/Authcontext";
 import { toast, ToastContainer } from "react-toastify";
 import Spinner from "../../../Components/Spinner";
-import { cocobaseError } from "../../../lib/hrlper";
+import { handleApiError } from "../../../lib/hrlper";
 
 function Login() {
-  const { login, googleSignin, githubSignIn, user } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
     if (user) {
@@ -19,65 +19,6 @@ function Login() {
     password: "",
     email: "",
   });
-  const handleGoogleResponse = async (response) => {
-    console.log("Full response object:", JSON.stringify(response));
-
-    if (!response?.credential) {
-      toast.error("Google did not return a credential");
-      return;
-    }
-    try {
-      setloading(true);
-
-      console.log("Google response:", response);
-
-      if (!response?.credential) {
-        throw new Error("Missing Google credential");
-      }
-
-      await googleSignin(response.credential);
-
-      toast.success("Logged in with Google!");
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Google Auth Error:", err);
-      cocobaseError(err);
-    } finally {
-      setloading(false);
-    }
-  };
-  useEffect(() => {
-    if (window.google) return;
-
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse,
-      });
-
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-btn"),
-        { theme: "outline", size: "large" },
-      );
-    };
-
-    document.body.appendChild(script);
-  }, []);
-
-  const handleGithub = async () => {
-    try {
-      await githubSignIn();
-      toast.success("Logged in with GitHub!");
-      navigate("/dashboard");
-    } catch (err) {
-      toast.error("GitHub login failed");
-    }
-  };
 
   const Handelchange = (e) => {
     const { name, value } = e.target;
@@ -117,12 +58,7 @@ function Login() {
       navigate("/dashboard");
     } catch (error) {
       setloading(false);
-      const strErr = JSON.parse(
-        error.toString().replace("Error: Request failed:", ""),
-      );
-      toast.error(`${strErr.error.detail}`);
-
-      // console.error(strErr.error.detail);
+      handleApiError(error);
     }
   };
 
@@ -160,58 +96,6 @@ function Login() {
               />
             </div>
 
-            <span className="block text-center text-slate-300 text-sm mb-3 sm:mb-4">
-              Or Continue with Google/GitHub to sign up
-            </span>
-
-            <div className="flex gap-3 sm:gap-4 items-center my-3 sm:my-4">
-              {/* <button
-                type="button"
-                onClick={handleGoogle}
-                className="w-[50%] py-2 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-xl flex justify-center items-center transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 48 48"
-                >
-                  <path
-                    fill="#fbc02d"
-                    d="M43.6 20.5H42V20H24v8h11.3C33.2 32.4 29 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.4 1.1 7.4 2.9l5.7-5.7C33.7 7.1 29.1 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19c9.8 0 18-7.1 18-19 0-1.3-.1-2.4-.4-3.5z"
-                  />
-                  <path
-                    fill="#e53935"
-                    d="M6.3 14.7l6.6 4.8C14.5 15.2 18.9 12 24 12c2.8 0 5.4 1.1 7.4 2.9l5.7-5.7C33.7 7.1 29.1 5 24 5c-7.2 0-13.4 3.6-17.1 9.2l-.6.5z"
-                  />
-                  <path
-                    fill="#4caf50"
-                    d="M24 43c5.2 0 9.9-2 13.4-5.2l-6.2-5.1C29.4 34.4 26.8 35 24 35c-5.1 0-9.4-2.6-11.6-6.5l-6.5 5c3.7 5.7 10 9.5 17.1 9.5z"
-                  />
-                  <path
-                    fill="#1565c0"
-                    d="M43.6 20.5H42V20H24v8h11.3C34.5 31.7 29.7 35 24 35c-5.1 0-9.4-2.6-11.6-6.5l-6.5 5C9.5 38.3 16.2 43 24 43c9.8 0 18-7.1 18-19 0-1.3-.1-2.4-.4-3.5z"
-                  />
-                </svg>
-              </button> */}
-
-              <div id="google-btn" className="w-[50%]"></div>
-              <button
-                type="button"
-                onClick={handleGithub}
-                className="w-[50%] py-2 cursor-pointer bg-slate-700 hover:bg-slate-600 rounded-xl flex justify-center items-center transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="white"
-                >
-                  <path d="M12 0C5.37 0 0 5.373 0 12a12 12 0 0 0 8.207 11.385c.6.11.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.334-1.756-1.334-1.756-1.09-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.806 1.305 3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.467-1.335-5.467-5.935 0-1.31.468-2.38 1.236-3.22-.124-.303-.536-1.522.117-3.176 0 0 1.008-.322 3.3 1.23A11.52 11.52 0 0 1 12 6.844c1.02.005 2.045.138 3.003.405 2.29-1.552 3.297-1.23 3.297-1.23.654 1.654.242 2.873.118 3.176.77.84 1.235 1.91 1.235 3.22 0 4.61-2.807 5.632-5.48 5.927.43.372.814 1.103.814 2.222 0 1.606-.014 2.903-.014 3.296 0 .32.216.694.825.576A12.005 12.005 0 0 0 24 12c0-6.627-5.373-12-12-12z" />
-                </svg>
-              </button>
-            </div>
 
             <button
               type="submit"

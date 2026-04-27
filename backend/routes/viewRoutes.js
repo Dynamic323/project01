@@ -8,11 +8,6 @@ const {
 } = require("../controllers/viewController");
 
 // Single file view
-router.get("/view/:id", viewUpload);
-
-// Added Pagination
-router.get("/user/files/:userId", getUserFiles);
-router.get("/user/text/:userId", getUserTexts);
-router.get("/user/all/:userId", getUserAll);
+router.get("/:id", viewUpload);
 
 module.exports = router;

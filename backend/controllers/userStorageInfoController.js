@@ -37,9 +37,8 @@ async function getCloudinaryBytesForUser(userId) {
 
 exports.userStorageInfoController = async (req, res) => {
   try {
-    // get user id from auth (adjust if you use req.user.uid or req.user.id)
-    const userId = req.user?.uid || req.user?.id || req.params.userId;
-    if (!userId) return res.status(400).json({ error: "user id missing" });
+    const userId = req.user.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     // 1) DB: total files bytes and count
     const filesSumQ = await pool.query(
@@ -102,7 +101,7 @@ exports.userStorageInfoController = async (req, res) => {
 
     // Build text object with defaults
     const textTypes = {
-      text: { count: 0, amountUsed: 0 }, 
+      text: { count: 0, amountUsed: 0 },
       code: { count: 0, amountUsed: 0 },
     };
 

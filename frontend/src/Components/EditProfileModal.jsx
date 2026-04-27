@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { handleApiError } from "../lib/hrlper";
 
 export default function EditProfileModal({
   isOpen,
   onClose,
   user,
-  updateUserEmail,
-  updateUserDisplayName,
+  updateUserSettings,
 }) {
   const [email, setEmail] = useState(user?.email || "");
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -16,21 +15,22 @@ export default function EditProfileModal({
     e.preventDefault();
     setIsLoading(true);
 
-    console.log(user);
-    
+    const updates = {};
+    if (email !== user.email) updates.email = email;
+    if (displayName !== user.displayName) updates.displayName = displayName;
+
+    if (Object.keys(updates).length === 0) {
+      onClose();
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      if (email !== user.email) {
-        await updateUserEmail(email);
-      }
-      if (displayName !== user.displayName) {
-        await updateUserDisplayName(displayName);
-      }
+      await updateUserSettings(updates);
       toast.success("Profile updated successfully!");
       onClose();
     } catch (error) {
-      toast.error(error.message);
-      console.log(error);
-      
+      handleApiError(error);
     } finally {
       setIsLoading(false);
     }

@@ -11,6 +11,9 @@ exports.viewUpload = async (req, res) => {
   const { id } = req.params;
   const { type } = req.query;
 
+  console.log(type, id);
+
+
   try {
     // First check if it's a file
     if (type === "file" || type === "auto") {
@@ -129,7 +132,7 @@ const parsePagination = (req) => {
 
 // ---------- Files ----------
 exports.getUserFiles = async (req, res) => {
-  const { userId } = req.params;
+  const userId = req.user.id;
   const { limit, offset, search } = parsePagination(req);
 
   try {
@@ -176,7 +179,7 @@ exports.getUserFiles = async (req, res) => {
 
 // ---------- Texts ----------
 exports.getUserTexts = async (req, res) => {
-  const { userId } = req.params;
+  const userId = req.user.id;
   const { limit, offset, search } = parsePagination(req);
 
   try {
@@ -219,8 +222,7 @@ exports.getUserTexts = async (req, res) => {
 
 // ---------- All (files + texts) ----------
 exports.getUserAll = async (req, res) => {
-  
-  const { userId } = req.params;
+  const userId = req.user.id;
   const { limit, offset, search } = parsePagination(req);
 
   try {

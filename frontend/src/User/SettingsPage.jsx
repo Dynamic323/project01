@@ -17,8 +17,6 @@ export function SettingsPage() {
   const {
     user,
     updateUserSettings,
-    updateUserEmail,
-    updateUserDisplayName,
   } = useAuth();
 
   const [settings, setSettings] = useState({
@@ -115,14 +113,12 @@ export function SettingsPage() {
                 </div>
                 <button
                   onClick={() => handleToggle("isPublic")}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    settings.isPublic ? "bg-red-500" : "bg-slate-600"
-                  }`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.isPublic ? "bg-red-500" : "bg-slate-600"
+                    }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      settings.isPublic ? "translate-x-6" : "translate-x-1"
-                    }`}
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isPublic ? "translate-x-6" : "translate-x-1"
+                      }`}
                   />
                 </button>
               </div>
@@ -155,14 +151,12 @@ export function SettingsPage() {
                   </div>
                   <button
                     onClick={() => handleToggle(item.key)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings[item.key] ? "bg-red-500" : "bg-slate-600"
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[item.key] ? "bg-red-500" : "bg-slate-600"
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings[item.key] ? "translate-x-6" : "translate-x-1"
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.key] ? "translate-x-6" : "translate-x-1"
+                        }`}
                     />
                   </button>
                 </div>
@@ -188,8 +182,7 @@ export function SettingsPage() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         user={user}
-        updateUserEmail={updateUserEmail}
-        updateUserDisplayName={updateUserDisplayName}
+        updateUserSettings={updateUserSettings}
       />
     </div>
   );

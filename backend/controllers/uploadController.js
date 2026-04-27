@@ -4,13 +4,13 @@ const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
 const uploadContent = async (req, res) => {
   try {
-    const { text, expiresAt, isPublic, title, type, Texttype, user_id } =
-      req.body;
+    const { text, expiresAt, isPublic, title, type, Texttype } = req.body;
+    const user_id = req.user ? req.user.id : null;
 
-      console.log(user_id);
-      
-    const previewOnly = req.query.preview === "true"; 
- 
+    console.log("Uploading for user:", user_id);
+
+    const previewOnly = req.query.preview === "true";
+
     let files = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       files = req.files;
@@ -48,7 +48,7 @@ const uploadContent = async (req, res) => {
       return res.status(201).json({
         success: true,
         message: "Text upload successful",
-        data: { id, type: finalType, content: text, title:title },
+        data: { id, type: finalType, content: text, title: title },
       });
     }
     // ----- FILE UPLOAD -----
@@ -146,7 +146,7 @@ const downloadFile = async (req, res) => {
 
   try {
     const result = await pool.query(
-      "SELECT file_path, file_name, file_type FROM file_uploads WHERE id = $1",
+      "SELECT file_url, file_name, file_type FROM file_uploads WHERE id = $1",
       [id]
     );
 
@@ -155,27 +155,13 @@ const downloadFile = async (req, res) => {
     }
 
     const file = result.rows[0];
-    const filePath = path.join(__dirname, "../uploads", file.file_path);
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).send("File not found on server");
+    if (!file.file_url) {
+      return res.status(404).send("File URL not found");
     }
 
-    // Set appropriate headers for download
-    res.setHeader(
-      "Content-disposition",
-      `inline; filename="${file.file_name}"`
-    );
-    res.setHeader("Content-type", file.file_type);
-
-    // Stream the file
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
-
-    fileStream.on("error", (err) => {
-      console.error("Error streaming file:", err);
-      res.status(500).end();
-    });
+    // Redirect to Cloudinary URL
+    res.redirect(file.file_url);
   } catch (err) {
     console.error("Error downloading file:", err);
     res.status(500).send("Server error while downloading file");

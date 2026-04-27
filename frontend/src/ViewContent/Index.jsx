@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import api from "../api";
+import apiService from "../services/apiService";
+import { handleApiError } from "../lib/hrlper";
 import { ImageViewer } from "./ImageViewer";
 import { FileDownload } from "./FileDownload";
 import { PdfViewer } from "./PdfViewer";
@@ -16,6 +17,7 @@ import { toast, ToastContainer } from "react-toastify";
 // Lucide icons
 import { Clipboard, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { TextDownload } from "./TextDownload";
+
 export default function Index() {
   const { id } = useParams();
   const [qry, setQry] = useState("auto");
@@ -24,11 +26,14 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fileType, setFileType] = useState("file");
+  const service = apiService(); // Public view doesn't necessarily need dashboard context
+
   // copy + expand state
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_PREVIEW = 200;
+
   useEffect(() => {
     const query = searchParams.get("type");
     if (query === "text") {
@@ -39,18 +44,16 @@ export default function Index() {
       setQry("auto");
     }
   }, [searchParams]);
+
   useEffect(() => {
     const fetchContent = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/view/${id}/?type=${qry}`);
-        if (response.data) {
-          setContent(response.data);
-          setFileType(response.data.type || "file");
-        } else {
-          toast.error("Error in fetching Files");
-        }
+        const data = await service.viewUpload(id, qry);
+        setContent(data);
+        setFileType(data.type || "file");
       } catch (err) {
+        handleApiError(err);
         setError(err.response?.data?.error || "Failed to load content");
       } finally {
         setLoading(false);

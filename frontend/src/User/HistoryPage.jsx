@@ -16,34 +16,34 @@ import { toast } from "react-toastify";
 import { useDashboard } from "../context/DashboardContext";
 import Loader, { Subloader } from "../Components/Loader";
 import { BackendURL, FrontendURL, handleCopy } from "../utils/file-helper";
-import { handleDelete } from "../utils/Helper_Function";
+// import { handleDelete } from "../utils/Helper_Function";
+
+import apiService from "../services/apiService";
+import { handleApiError } from "../lib/hrlper";
 
 export function HistoryPage() {
-  const { getValue, setValue } = useDashboard();
+  const dashboard = useDashboard();
+  const { getValue, setValue } = dashboard;
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const { user } = useAuth();
-  const history = getValue("user-history");
+  const service = apiService(dashboard);
+
+  const history = getValue(`user_uploads_all_${user?.id}`) || [];
 
   useEffect(() => {
     async function fetchHistory() {
-      if (!history) {
+      if (!history.length && user) {
         setLoading(true);
         try {
-          const res = await fetch(
-            `${BackendURL}/api/user-history/${user.authUser.uid}`
-          );
-          const data = await res.json();
-          setValue(
-            "user-history",
-            Array.isArray(data) ? data : data.files || []
-          );
+          const token = localStorage.getItem("token");
+        const usrhistory =  await service.getUserAll(user.id, token);
+        console.log(usrhistory);
+        
         } catch (error) {
-          toast.error("Error in getting History...");
-          console.log(error);
-          setValue("user-history", []);
+          handleApiError(error);
         } finally {
           setLoading(false);
         }
@@ -52,39 +52,21 @@ export function HistoryPage() {
     fetchHistory();
   }, [user]);
 
-  const getFileIcon = (fileType) => {
-    if (!fileType) return <AiOutlineFile className="h-5 w-5 text-red-400" />;
-    if (fileType.startsWith("image"))
-      return <AiOutlinePicture className="h-5 w-5 text-red-400" />;
-    if (fileType.startsWith("audio"))
-      return <AiOutlineAudio className="h-5 w-5 text-red-400" />;
-    return <AiOutlineFile className="h-5 w-5 text-red-400" />;
-  };
-
-  const formatSize = (bytes) => {
-    const b = Number(bytes);
-    if (!b) return "0 B";
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(b) / Math.log(1024));
-    return `${(b / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
-  };
-
   const handleDeleteItem = async () => {
-    if (!itemToDelete) return;
+    if (!itemToDelete || !user) return;
 
     setDeleting(true);
     try {
-      const success = await handleDelete(itemToDelete.id, itemToDelete.type);
-      if (success) {
-        // Update local state by filtering out the deleted item
-        setValue(
-          "user-history",
-          history.filter(item => item.id !== itemToDelete.id)
-        );
-        toast.success(`${itemToDelete.type} deleted successfully`);
-      }
+      const token = localStorage.getItem("token");
+      await service.deleteUpload(itemToDelete.id, token);
+
+      // Update local state is handled by apiService invalidation, but for immediate UI:
+      const updatedHistory = history.filter(item => item.id !== itemToDelete.id);
+      setValue(`user_uploads_all_${user.id}`, updatedHistory);
+
+      toast.success(`${itemToDelete.type || "Item"} deleted successfully`);
     } catch (error) {
-      toast.error(`Failed to delete ${itemToDelete.type}`);
+      handleApiError(error);
     } finally {
       setDeleting(false);
       setShowConfirm(false);

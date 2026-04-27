@@ -1,37 +1,33 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { db } from "../lib/cocobase";
+import apiService from "../services/apiService";
+import { useDashboard } from "./DashboardContext";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  //  Restore session on refresh
+  const dashboard = useDashboard();
+  const service = apiService(dashboard);
+
+  // Restore session on refresh
   useEffect(() => {
     const init = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        await db.auth.initAuth();
-        try {
-          const currentUser = await db.auth.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-            localStorage.setItem(
-              "user",
-              JSON.stringify({
-                uid: currentUser.id,
-                email: currentUser.email,
-                displayName: currentUser.displayName,
-              }),
-            );
-          }
-        } catch {
-          // No active session, that's fine
-          setUser(null);
-          localStorage.removeItem("user");
+        const userData = await service.getMe(token);
+        if (userData) {
+          setUser(userData);
         }
       } catch (err) {
         console.error("Auth init error:", err);
         setUser(null);
+        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
@@ -39,96 +35,41 @@ export const AuthProvider = ({ children }) => {
     init();
   }, []);
 
-  //  Register
+  // Register
   const register = async (email, password, name) => {
-    const res = await db.auth.register({
-      email,
-      password,
-      displayName: name,
-    });
-
-    const currentUser = await db.auth.getCurrentUser();
-
-    const newUser = {
-      ...currentUser,
-      UserPlan: "free",
-      isPublic: true,
-      defaultType: "text",
-      allowAnalytics: true,
-      emailNotifications: true,
-      fileActivityAlerts: false,
-      profileImage: "",
-    };
+    const data = await service.register(email, name, password);
+    const { token, user: newUser } = data;
 
     setUser(newUser);
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        uid: currentUser.id,
-        email: currentUser.email,
-        displayName: currentUser.displayName,
-      }),
-    );
-
-    return res;
+    localStorage.setItem("token", token);
+    return data;
   };
 
   // Login
   const login = async (email, password) => {
-    const res = await db.auth.login({ email, password });
+    const data = await service.login(email, password);
+    const { token, user: loggedInUser } = data;
 
-    const currentUser = await db.auth.getCurrentUser();
-
-    setUser(currentUser);
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        uid: currentUser.id,
-        email: currentUser.email,
-        displayName: currentUser.displayName,
-      }),
-    );
-
-    return res;
+    setUser(loggedInUser);
+    localStorage.setItem("token", token);
+    return data;
   };
 
   // Logout
   const logout = async () => {
-    await db.auth.logout();
     setUser(null);
-    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
-  //  Update profile (email/name/settings)
+  // Update profile
   const updateUserSettings = async (updates) => {
     if (!user) throw new Error("No user logged in");
-
-    const updatedUser = await db.auth.updateUser(updates);
-
-    setUser((prev) => ({
-      ...prev,
-      ...updatedUser,
-    }));
+    const token = localStorage.getItem("token");
+    const data = await service.updateProfile(updates, token);
+    setUser(data.user);
+    return data;
   };
 
-  const googleSignin = async (id_token) => {
-    console.log("See the ID toeken ooo", id_token);
-
-    if (!id_token) throw new Error("No Google token received");
-
-    const res = await db.auth.loginWithGoogle({
-      idToken: id_token,
-      platform: "web",
-    });
-
-    const currentUser = await db.auth.getCurrentUser();
-
-    setUser(currentUser);
-
-    return res;
-  };
   return (
     <AuthContext.Provider
       value={{
@@ -138,7 +79,6 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         updateUserSettings,
-        googleSignin,
       }}
     >
       {!loading && children}

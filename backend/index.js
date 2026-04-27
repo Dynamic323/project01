@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("./config/env");
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -22,9 +22,12 @@ app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/uploads", require("./routes/uploadRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
+app.use("/api/view", require("./routes/viewRoutes"));
 
 app.get("/", (req, res) =>
-  res.send("DyShareX Backend is Running ✅ yes na me add the emoji looks cool"),
+  res.send(
+    "DyShareX Backend is Running ✅ yes na me add the emoji looks cool :)",
+  ),
 );
 
 const PORT = process.env.PORT || 5000;
