@@ -45,24 +45,19 @@ export function FilesPage() {
   // Get files from context
   const files = getValue("user_uploads_files") || [];
 
-const fetchFiles = async () => {
-  if (!user?.id) return;
+  const fetchFiles = async () => {
+    if (!user?.id) return;
 
-  const cached = getValue("user_uploads_files");
-  if (cached?.length > 0) return; // already have data
-
-  setLoading(true);
-  try {
-    const token = localStorage.getItem("token");
-    const data = await service.getUserFiles(user.id, token);
-    const fileList = data.files ?? [];
-    setValue("user_uploads_files", fileList); 
-  } catch (err) {
-    handleApiError(err);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      await service.getUserFiles(user.id, token);
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchFiles(currentPage, searchTerm);
@@ -100,11 +95,20 @@ const fetchFiles = async () => {
         </div>
         <Link
           to={"/dashboard/dropzone"}
-          className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500"
+          className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 brutalist-btn brutalist-red"
         >
           <AiOutlinePlus className="h-4 w-4" /> Upload New File
         </Link>
       </div>
+
+      {user?.user_plan === "free" && (
+        <div className="mb-6 p-4 bg-red-400/10 border border-red-400/20 rounded-lg flex items-center gap-3">
+          <AiOutlineExclamationCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+          <p className="text-sm text-slate-300">
+            <span className="text-red-400 font-bold">Free Plan Note:</span> Your files will be automatically deleted <span className="text-white font-medium">4 days</span> after upload. Upgrade to keep them forever!
+          </p>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative mb-6">
@@ -175,13 +179,13 @@ const fetchFiles = async () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handlePreview(file.id)}
-                    className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                    className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 brutalist-btn brutalist-card"
                   >
                     <AiOutlineEye className="inline h-3 w-3" /> Preview
                   </button>
                   <button
                     onClick={() => handleCopy(`${FrontendURL}/view/${file.id}`)}
-                    className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                    className="flex-1 px-3 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 brutalist-btn brutalist-card"
                   >
                     <AiOutlineCopy className="inline h-3 w-3" /> Copy
                   </button>
@@ -190,7 +194,7 @@ const fetchFiles = async () => {
                       setFileToDelete(file);
                       setShowConfirm(true);
                     }}
-                    className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded-lg"
+                    className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded-lg brutalist-btn brutalist-card"
                   >
                     <AiOutlineDelete className="h-4 w-4" />
                   </button>

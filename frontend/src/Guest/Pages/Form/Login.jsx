@@ -11,7 +11,7 @@ function Login() {
   const navigate = useNavigate();
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/dashboard/dropzone");
     }
   }, [user, navigate]);
   const [loading, setloading] = useState(false);
@@ -99,7 +99,7 @@ function Login() {
 
             <button
               type="submit"
-              className="w-full mb-3 cursor-pointer py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-red-400 to-red-500 text-white font-medium flex justify-center items-center transition-all hover:from-red-500 hover:to-red-600"
+              className="w-full mb-3 cursor-pointer py-2.5 sm:py-3 rounded-xl text-white font-medium flex justify-center items-center transition-all  bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 brutalist-btn brutalist-red"
               disabled={loading}
             >
               {loading ? <Spinner /> : "Create"}

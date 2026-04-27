@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../../context/Authcontext";
 import { handleApiError } from "../../../lib/hrlper";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import Spinner from "../../../Components/Spinner";
 function Register() {
   const { register } = useAuth();
@@ -43,7 +43,7 @@ function Register() {
       await register(email, password, name);
       setLoading(false);
       toast.success("Account created successfully! Welcome to Replico");
-      navigate("/dashboard");
+      navigate("/dashboard/dropzone");
     } catch (error) {
       setLoading(false);
       handleApiError(error);
@@ -88,7 +88,7 @@ function Register() {
 
           <button
             type="submit"
-            className="w-full mb-3 cursor-pointer py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-red-400 to-red-500 text-white font-medium flex justify-center items-center transition-all hover:from-red-500 hover:to-red-600"
+            className="w-full mb-3 cursor-pointer py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-red-400 to-red-500 text-white font-medium flex justify-center items-center transition-all hover:from-red-500 hover:to-red-600 brutalist-btn brutalist-red"
             disabled={loading}
           >
             {loading ? <Spinner /> : "Create"}

@@ -38,28 +38,29 @@ export default function TextPage() {
   const cachedText = getValue("user_uploads_texts");
 
   const fetchTexts = useCallback(async () => {
-    if (!cachedText && user) {
+    if (!cachedText && user?.id) {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const data = await service.getUserTexts(user.id, token);
-
-        setTexts(data.texts ?? []);
+        await service.getUserTexts(user.id, token);
       } catch (err) {
         handleApiError(err);
       } finally {
         setLoading(false);
       }
-    } else if (cachedText) {
-      setTexts(
-        Array.isArray(cachedText) ? cachedText : (cachedText.texts ?? []),
-      );
     }
-  }, [user, service, cachedText]);
+  }, [user?.id, service, cachedText]);
 
   useEffect(() => {
     fetchTexts();
   }, [fetchTexts]);
+
+  // Sync internal state with cached data
+  useEffect(() => {
+    if (cachedText) {
+      setTexts(Array.isArray(cachedText) ? cachedText : (cachedText.texts ?? []));
+    }
+  }, [cachedText]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -198,12 +199,22 @@ export default function TextPage() {
           </div>
           <Link
             to={"/dashboard/dropzone?mode=text"}
-            className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors brutalist-btn brutalist-red"
           >
             <AiOutlinePlus className="h-4 w-4" />
             Create New Text
           </Link>
         </div>
+
+        {user?.user_plan === "free" && (
+          <div className="mb-6 p-4 bg-red-400/10 border border-red-400/20 rounded-lg flex items-center gap-3">
+            <AiOutlineExclamationCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+            <p className="text-sm text-slate-300">
+              <span className="text-red-400 font-bold">Free Plan Note:</span> Your text uploads will be automatically deleted <span className="text-white font-medium">10 days</span> after creation. Upgrade to keep them forever!
+            </p>
+          </div>
+        )}
+
         {/* Search */}
         <div className="relative mb-6">
           <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -257,14 +268,14 @@ export default function TextPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => navigate(`/view/${txt.id}/?type=text`)}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors brutalist-btn brutalist-card"
                 >
                   <AiOutlineEye className="h-3 w-3" />
                   View
                 </button>
                 <button
                   onClick={() => handleCopy(txt.content)}
-                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors brutalist-btn brutalist-card"
                 >
                   <AiOutlineCopy className="h-3 w-3" />
                   Copy
@@ -274,7 +285,7 @@ export default function TextPage() {
                     setTextToDelete(txt);
                     setShowConfirm(true);
                   }}
-                  className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded-lg transition-colors"
+                  className="p-2 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded-lg transition-colors brutalist-btn brutalist-card"
                   title="Delete text"
                 >
                   <AiOutlineDelete className="h-4 w-4" />
@@ -315,11 +326,10 @@ export default function TextPage() {
               <button
                 key={num}
                 onClick={() => paginate(num)}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  currentPage === num
-                    ? "bg-red-400 text-white"
-                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                }`}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${currentPage === num
+                  ? "bg-red-400 text-white"
+                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  }`}
               >
                 {num}
               </button>

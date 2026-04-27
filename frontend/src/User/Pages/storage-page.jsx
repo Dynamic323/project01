@@ -40,22 +40,23 @@ export function StoragePage() {
 
   useEffect(() => {
     async function fetchStorage() {
-      if (!initialData && user) {
+      if (!initialData && user?.id) {
         setLoading(true);
         try {
           const token = localStorage.getItem("token");
           const data = await service.getUserStorage(user.id, token);
-          console.log(data);
+          // Explicitly set value to be sure, although apiService.getUserStorage does it
+          if (setValue) setValue(`user_storage_stats`, data);
         } catch (err) {
           handleApiError(err);
-          setValue(`user_storage_stats`, null);
+          if (setValue) setValue(`user_storage_stats`, null);
         } finally {
           setLoading(false);
         }
       }
     }
     fetchStorage();
-  }, [user.id, initialData, service]);
+  }, [user?.id, initialData, service, setValue]);
 
   if (loading) return <Subloader text={"Loading Storage info...."} />;
   if (!storageData)
@@ -134,9 +135,8 @@ export function StoragePage() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-4 h-4 rounded ${
-                          typeColors[ft.type] || "bg-gray-500"
-                        }`}
+                        className={`w-4 h-4 rounded ${typeColors[ft.type] || "bg-gray-500"
+                          }`}
                       />
                       <span className="text-white">{ft.type}</span>
                     </div>
@@ -186,11 +186,11 @@ export function StoragePage() {
           <div className="bg-slate-900 border border-slate-700 rounded-lg p-6">
             <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center gap-2 p-3 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-300 transition-colors border border-slate-600">
+              <button className="w-full flex items-center gap-2 p-3 bg-red-400 text-white rounded-lg font-semibold hover:bg-red-500 transition-colors brutalist-btn brutalist-red">
                 <AiOutlineCloudUpload className="h-4 w-4" />
                 Upgrade Storage
               </button>
-              <button className="w-full flex items-center gap-2 p-3 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors border border-slate-600">
+              <button className="w-full flex items-center gap-2 p-3 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors brutalist-btn brutalist-card">
                 <AiOutlineDatabase className="h-4 w-4" />
                 Clean Up Files
               </button>

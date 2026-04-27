@@ -119,7 +119,7 @@ export default function Index() {
                   {/* Copy Button */}
                   <button
                     onClick={handleCopy}
-                    className="absolute top-2 right-2 flex items-center gap-1 bg-red-400 hover:bg-red-500 text-white text-sm font-medium px-3 py-1 rounded shadow"
+                    className="absolute top-2 right-2 flex items-center gap-1 bg-red-400 hover:bg-red-500 text-white text-sm font-medium px-3 py-1 rounded brutalist-btn brutalist-red"
                   >
                     {copied ? (
                       <>
@@ -167,18 +167,18 @@ export default function Index() {
               <TextDownload
                 content={content.content}
                 fileName={content.title}
-                className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center"
+                className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center brutalist-btn brutalist-red"
               />
             ) : (
               <FileDownload
                 url={content.file_url}
                 fileName={content.name}
-                className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center"
+                className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded-lg flex items-center justify-center brutalist-btn brutalist-red"
               />
             )}
             <button
               onClick={toggleModal}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg flex items-center justify-center"
+              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg flex items-center justify-center brutalist-btn brutalist-card"
             >
               <FiShare2 className="mr-2" /> Share
             </button>
@@ -217,7 +217,7 @@ export default function Index() {
             </p>
             <Link
               to="/register"
-              className="inline-flex items-center px-6 py-3 bg-red-400 hover:bg-red-500 text-white font-semibold rounded-lg"
+              className="inline-flex items-center px-6 py-3 bg-red-400 hover:bg-red-500 text-white font-semibold rounded-lg brutalist-btn brutalist-red"
             >
               <FiUserPlus className="mr-2" /> Create Account
             </Link>
@@ -263,7 +263,7 @@ export default function Index() {
           </div>
           <button
             onClick={toggleModal}
-            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 brutalist-btn brutalist-card"
           >
             Close
           </button>

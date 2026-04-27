@@ -1,170 +1,91 @@
-const { v4: uuidv4 } = require("uuid");
+// controllers/uploadController.js
 const pool = require("../config/db");
-const cloudinary = require("../config/cloudinary");
+const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
-const uploadContent = async (req, res) => {
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+
+const PLAN_LIMIT_MB = 500; // free plan in MB
+
+exports.uploadContent = async (req, res) => {
+  const userId = req.user.id;
+  const { title, expiresAt, isPublic, type, text, type: textType } = req.body;
+  const files = req.files;
+
   try {
-    const { text, expiresAt, isPublic, title, type, Texttype } = req.body;
-    const user_id = req.user ? req.user.id : null;
+    // Check user plan
+    const userRes = await pool.query("SELECT user_plan FROM users WHERE id = $1", [userId]);
+    const userPlan = userRes.rows[0]?.user_plan || "free";
 
-    console.log("Uploading for user:", user_id);
+    let expirationDate = expiresAt ? new Date(expiresAt) : null;
 
-    const previewOnly = req.query.preview === "true";
+    // Enforce limits for free users
+    if (userPlan === "free") {
+      const maxDays = (type === "file") ? 4 : 10;
+      const enforcedExpiry = new Date();
+      enforcedExpiry.setDate(enforcedExpiry.getDate() + maxDays);
 
-    let files = [];
-    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      files = req.files;
-    } else if (req.file) {
-      files = [req.file];
+      if (!expirationDate || expirationDate > enforcedExpiry) {
+        expirationDate = enforcedExpiry;
+      }
     }
-    // ----- TEXT UPLOAD -----
-    if (text && files.length === 0) {
-      if (previewOnly) {
-        return res.status(200).json({
-          success: true,
-          message: "Preview of text content",
-          data: { text, title },
-        });
-      }
-      const id = uuidv4().slice(0, 8);
-      const finalType = Texttype || type || "text";
-      const expires_at = expiresAt
-        ? new Date(expiresAt)
-        : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-      await pool.query(
-        `INSERT INTO text_uploads (
-          id, title, type, content, expires_at, is_public, user_id, views
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,DEFAULT)`,
-        [
-          id,
-          title || null,
-          finalType,
-          text,
-          expires_at,
-          isPublic !== undefined ? isPublic : true,
-          user_id || null,
-        ]
-      );
-      return res.status(201).json({
-        success: true,
-        message: "Text upload successful",
-        data: { id, type: finalType, content: text, title: title },
-      });
-    }
-    // ----- FILE UPLOAD -----
-    if (files.length > 0) {
-      const responses = [];
-      // Split the title string into an array of file names
-      const fileNames = title ? title.split(", ") : [];
-      // Check if the number of file names matches the number of files
-      if (fileNames.length !== files.length) {
-        console.warn(
-          `Number of file names (${fileNames.length}) does not match number of files (${files.length})`
-        );
-      }
-      // Preview the files with their names
-      const filesWithNames = files.map((file, index) => ({
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size,
-        title: fileNames[index] || file.originalname,
-      }));
-      console.log("Preview of files with their names:", filesWithNames);
-      if (previewOnly) {
-        return res.status(200).json({
-          success: true,
-          message: "Preview of files with their names",
-          data: filesWithNames,
-        });
-      }
-      // Continue with the file upload process
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const id = uuidv4().slice(0, 8);
-        const expires_at = expiresAt
-          ? new Date(expiresAt)
-          : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+    if (type === "file" && files && files.length > 0) {
+      const results = [];
+      for (const file of files) {
         // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: `user_${user_id}`,
+        const cloudRes = await cloudinary.uploader.upload(file.path, {
+          folder: `user_${userId}`,
           resource_type: "auto",
         });
-        if (!result || !result.secure_url) {
-          return res.status(500).json({ error: "Failed to upload file" });
-        }
-        // Use the corresponding file name from the array, or the file's original name as fallback
-        const fileTitle = fileNames[i] || file.originalname;
-        await pool.query(
-          `INSERT INTO file_uploads (
-            id, title, file_url, file_name, file_type,
-            file_size, expires_at, is_public, user_id, views
-          ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,DEFAULT)`,
+
+        // Insert into DB
+        const dbRes = await pool.query(
+          `INSERT INTO file_uploads (id, user_id, file_name, file_url, file_size, file_type, cloudinary_public_id, title, expires_at, is_public)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
           [
-            id,
-            fileTitle,
-            result.secure_url,
+            uuidv4(),
+            userId,
             file.originalname,
-            file.mimetype,
+            cloudRes.secure_url,
             file.size,
-            expires_at,
-            isPublic !== undefined ? isPublic : true,
-            user_id || null,
+            file.mimetype,
+            cloudRes.public_id,
+            title || file.originalname,
+            expirationDate,
+            isPublic === "true" || isPublic === true,
           ]
         );
-        // Delete local temp file
-        fs.unlink(file.path, (err) => {
-          if (err)
-            console.error("Failed to delete local file:", file.path, err);
-        });
-        responses.push({
-          id,
-          file_url: result.secure_url,
-          file_name: file.originalname,
-          file_type: file.mimetype,
-          file_size: file.size,
-          title: fileTitle,
-        });
+
+        // Delete local file
+        fs.unlinkSync(file.path);
+        results.push(dbRes.rows[0]);
       }
-      return res.status(201).json({
-        success: true,
-        message: "File upload successful",
-        data: responses,
-      });
+      return res.status(201).json({ message: "Files uploaded successfully", data: results });
+    } else if (type === "text" || type === "code") {
+      const dbRes = await pool.query(
+        `INSERT INTO text_uploads (id, user_id, title, content, type, expires_at, is_public)
+         VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [
+          uuidv4(),
+          userId,
+          title || "Untitled",
+          text,
+          textType || type,
+          expirationDate,
+          isPublic === "true" || isPublic === true,
+        ]
+      );
+      return res.status(201).json({ message: "Text uploaded successfully", data: dbRes.rows[0] });
+    } else {
+      return res.status(400).json({ error: "Invalid upload type or missing content" });
     }
-    // Nothing provided
-    return res
-      .status(400)
-      .json({ error: "Either text content or a file is required." });
   } catch (err) {
     console.error("Upload error:", err);
-    res.status(500).json({ error: "Server error" });
+    // Cleanup local files if any on error
+    if (files) {
+      files.forEach(f => { if (fs.existsSync(f.path)) fs.unlinkSync(f.path); });
+    }
+    return res.status(500).json({ error: "Failed to upload content" });
   }
 };
-
-const downloadFile = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const result = await pool.query(
-      "SELECT file_url, file_name, file_type FROM file_uploads WHERE id = $1",
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).send("File not found");
-    }
-
-    const file = result.rows[0];
-
-    if (!file.file_url) {
-      return res.status(404).send("File URL not found");
-    }
-
-    // Redirect to Cloudinary URL
-    res.redirect(file.file_url);
-  } catch (err) {
-    console.error("Error downloading file:", err);
-    res.status(500).send("Server error while downloading file");
-  }
-};
-module.exports = { uploadContent, downloadFile };

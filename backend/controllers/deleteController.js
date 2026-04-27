@@ -1,12 +1,12 @@
 const pool = require("../config/db");
+const cloudinary = require("cloudinary").v2;
 
 exports.deleteUpload = async (req, res) => {
   const { id } = req.params;
   const { type } = req.query;
 
-  // Validate type parameter
   if (!type || (type !== "file" && type !== "text")) {
-    return res.status(400).json({ error: "Invalid or missing type parameter. Use 'file' or 'text'." });
+    return res.status(400).json({ error: "Invalid or missing type parameter." });
   }
 
   try {
@@ -21,6 +21,14 @@ exports.deleteUpload = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Upload not found" });
+    }
+
+    // Delete from Cloudinary if it's a file
+    if (type === "file") {
+      const file = result.rows[0];
+      if (file.cloudinary_public_id) {
+        await cloudinary.uploader.destroy(file.cloudinary_public_id);
+      }
     }
 
     res.json({ message: `${type} upload deleted successfully` });

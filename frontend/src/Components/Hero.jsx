@@ -17,7 +17,7 @@ import {
 } from "react-icons/ai"
 function Hero() {
 
-    const fileTypes = [
+  const fileTypes = [
     { icon: AiOutlineFile, name: "Documents", types: "PDF, DOC, TXT, etc." },
     { icon: AiOutlinePicture, name: "Images", types: "JPG, PNG, GIF, etc." },
     { icon: AiOutlineAudio, name: "Audio", types: "MP3, WAV, M4A, etc." },
@@ -52,7 +52,7 @@ function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-red-400/20 hover:shadow-red-400/40 hover:from-red-300 hover:to-red-400 transition-all duration-300">
+            <button className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-xl font-bold text-lg hover:from-red-500 hover:to-red-600 transition-all duration-300 brutalist-btn brutalist-red">
               <AiOutlineCloudUpload className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
               Start Sharing Now
               <AiOutlineArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -60,7 +60,7 @@ function Hero() {
 
             <a
               href="#demo"
-              className="flex items-center gap-3 px-8 py-4 bg-slate-800 border border-slate-600 text-white rounded-xl font-semibold hover:bg-slate-700 hover:border-slate-500 transition-all duration-200"
+              className="flex items-center gap-3 px-8 py-4 bg-slate-800 border border-slate-600 text-white rounded-xl font-semibold hover:bg-slate-800 hover:border-slate-600 transition-all duration-200 brutalist-btn brutalist-ghost"
             >
               <AiOutlineLink className="h-5 w-5" />
               Try Demo Below
@@ -72,7 +72,7 @@ function Hero() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {fileTypes.map((type, index) => (
                 <div
-                  key={index}
+                  key={index} 
                   className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors"
                 >
                   <type.icon className="h-8 w-8 text-red-400 mx-auto mb-2" />

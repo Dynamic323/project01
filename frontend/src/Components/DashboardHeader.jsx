@@ -59,7 +59,7 @@ const DashboardHeader = () => {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center space-x-2 focus:outline-none"
+            className="flex items-center space-x-2 focus:outline-none brutalist-btn brutalist-card"
           >
             {/* Welcome Message */}
             <span className="hidden md:inline text-slate-200 font-medium">
@@ -106,7 +106,7 @@ const DashboardHeader = () => {
                     logout();
                     setIsDropdownOpen(false);
                   }}
-                  className="w-full flex items-center px-4 py-2 text-slate-200 hover:bg-slate-600 transition-colors"
+                  className="w-full flex items-center px-4 py-2 text-slate-200 hover:bg-slate-600 transition-colors brutalist-btn brutalist-card"
                 >
                   <AiOutlineLogout className="mr-2" />
                   Logout

@@ -74,7 +74,7 @@ const UploadSuccessModal = ({ data, onClose }) => {
     return null;
   };
 
-  
+
   return (
     <>
       <ToastContainer />
@@ -192,7 +192,7 @@ const UploadSuccessModal = ({ data, onClose }) => {
                                 onClick={() =>
                                   window.open(`${FrontendURL}/view/${item.id}`, "_blank")
                                 }
-                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
+                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all brutalist-btn brutalist-card"
                               >
                                 <AiOutlineEye />
                                 <span>Preview</span>
@@ -204,7 +204,7 @@ const UploadSuccessModal = ({ data, onClose }) => {
                                     "Link copied"
                                   )
                                 }
-                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
+                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all brutalist-btn brutalist-card"
                               >
                                 <Copy className="w-4 h-4 " />
                                 <span>Copy Link</span>
@@ -219,7 +219,7 @@ const UploadSuccessModal = ({ data, onClose }) => {
 
                 {/* Text Upload Layout */}
                 {isTextUpload && (
-                  
+
                   <>
                     {data.map((item, index) => (
                       <motion.div
@@ -236,41 +236,41 @@ const UploadSuccessModal = ({ data, onClose }) => {
                           </h3>
                         </div>
                         <div className="relative bg-slate-900 rounded-lg p-4 mb-4 overflow-x-auto">
-                        <pre className="text-sm text-slate-300 whitespace-pre-wrap">
-  {item.content.length > 30
-    ? item.content.slice(0, 21) + "..."
-    : item.content}
-</pre>
+                          <pre className="text-sm text-slate-300 whitespace-pre-wrap">
+                            {item.content.length > 30
+                              ? item.content.slice(0, 21) + "..."
+                              : item.content}
+                          </pre>
 
 
- <div className="mt-3">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-xs text-slate-400">
-                                      Copy ID:
-                                    </span>
-                                    <div className="relative flex-1">
-                                      <input
-                                        type="text"
-                                        value={item.id}
-                                        readOnly
-                                        className="w-full bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-green-400"
-                                      />
-                                      <button
-                                        onClick={() =>
-                                          handleCopy(`${item.id}`, "ID copied")
-                                        }
-                                        className="absolute right-2 inset-y-0 p-1 text-slate-400 hover:text-white"
-                                        title="Copy ID"
-                                      >
-                                        {copied ? (
-                                          <AiOutlineCheck className="text-green-400" />
-                                        ) : (
-                                          <AiOutlineCopy />
-                                        )}
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
+                          <div className="mt-3">
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-slate-400">
+                                Copy ID:
+                              </span>
+                              <div className="relative flex-1">
+                                <input
+                                  type="text"
+                                  value={item.id}
+                                  readOnly
+                                  className="w-full bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg pr-9 focus:outline-none focus:ring-2 focus:ring-green-400"
+                                />
+                                <button
+                                  onClick={() =>
+                                    handleCopy(`${item.id}`, "ID copied")
+                                  }
+                                  className="absolute right-2 inset-y-0 p-1 text-slate-400 hover:text-white"
+                                  title="Copy ID"
+                                >
+                                  {copied ? (
+                                    <AiOutlineCheck className="text-green-400" />
+                                  ) : (
+                                    <AiOutlineCopy />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                           {/* <button
                             onClick={() => copyToClipboard(item.content)}
                             className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-all"
@@ -285,30 +285,30 @@ const UploadSuccessModal = ({ data, onClose }) => {
                         </div>
                         {/* Action buttons */}
                         <div className="flex gap-2 mt-4">
-                              <button
-                                onClick={() =>
-                                  window.open(`${FrontendURL}/view/${item.id}`, "_blank")
-                                }
-                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
-                              >
-                                <AiOutlineEye />
-                                <span>Preview</span>
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleCopy(
-                                    `${FrontendURL}/view/${item.id}`,
-                                    "Link copied"
-                                  )
-                                }
-                                className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all"
-                              >
-                                <Copy className="w-4 h-4 " />
-                                <span>Copy Link</span>
-                              </button>
-                            </div>
+                          <button
+                            onClick={() =>
+                              window.open(`${FrontendURL}/view/${item.id}`, "_blank")
+                            }
+                            className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all brutalist-btn brutalist-card"
+                          >
+                            <AiOutlineEye />
+                            <span>Preview</span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleCopy(
+                                `${FrontendURL}/view/${item.id}`,
+                                "Link copied"
+                              )
+                            }
+                            className="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-all brutalist-btn brutalist-card"
+                          >
+                            <Copy className="w-4 h-4 " />
+                            <span>Copy Link</span>
+                          </button>
+                        </div>
                       </motion.div>
-                      
+
                     ))}
                   </>
                 )}
@@ -323,7 +323,7 @@ const UploadSuccessModal = ({ data, onClose }) => {
               >
                 <button
                   onClick={onClose}
-                  className="px-8 py-3 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-all flex items-center gap-2 shadow-md shadow-red-400/30 hover:shadow-red-400/50"
+                  className="px-8 py-3 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-all flex items-center gap-2 brutalist-btn brutalist-red"
                 >
                   <AiOutlineCheck />
                   <span>Finish</span>

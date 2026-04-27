@@ -67,14 +67,14 @@ export default function EditProfileModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+              className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 brutalist-btn brutalist-card"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-300 disabled:opacity-50"
+              className="px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-300 disabled:opacity-50 brutalist-btn brutalist-red"
             >
               {isLoading ? "Saving..." : "Save"}
             </button>

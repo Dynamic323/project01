@@ -119,22 +119,20 @@ export default function UploadFormModal({
             <div className="flex gap-2">
               <button
                 type="button"
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors ${
-                  isPublic
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors ${isPublic
                     ? "bg-red-400 text-white shadow-md"
                     : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                }`}
+                  }`}
                 onClick={() => setIsPublic(true)}
               >
                 Public
               </button>
               <button
                 type="button"
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors ${
-                  !isPublic
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg transition-colors ${!isPublic
                     ? "bg-red-400 text-white shadow-md"
                     : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                }`}
+                  }`}
                 onClick={() => setIsPublic(false)}
               >
                 Private
@@ -163,11 +161,10 @@ export default function UploadFormModal({
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
             <button
               type="submit"
-              className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-all w-full sm:w-auto ${
-                isSubmitting
+              className={`flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-all w-full sm:w-auto brutalist-btn brutalist-red ${isSubmitting
                   ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                  : "bg-red-400 text-white hover:bg-red-500 shadow-md hover:shadow-red-400/30"
-              }`}
+                  : "bg-red-400 text-white hover:bg-red-500"
+                }`}
             >
               {isSubmitting ? (
                 <>

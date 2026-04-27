@@ -197,6 +197,11 @@ export function Dropzone() {
   };
 
   const handleProceed = () => {
+    if (!user) {
+      toast.info("Please create an account to continue with your upload.");
+      navigate("/register");
+      return;
+    }
     if (textContent === "" && files.length === 0) {
       toast.error("Please enter some text or select files to upload.");
       return;
@@ -355,7 +360,7 @@ export function Dropzone() {
       <div className="mt-8 flex justify-center">
         <button
           onClick={handleProceed}
-          className="flex items-center cursor-pointer gap-3 px-8 py-4 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all font-bold shadow-lg hover:shadow-red-400/40"
+          className="flex items-center cursor-pointer gap-3 px-8 py-4 bg-red-400 text-white rounded-xl border-2 border-red-400 hover:bg-transparent hover:text-red-400 transition-all font-bold brutalist-btn brutalist-red"
         >
           <AiOutlineLink className="text-xl" />
           Proceed

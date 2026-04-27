@@ -52,43 +52,46 @@ export const apiService = (dashboardContext) => {
 
         // ---- DATA RETRIEVAL (With Caching) ----
         getUserAll: async (userId, token, forceRefresh = false) => {
-            const cacheKey = `user_uploads_all_${userId}`;
+            const cacheKey = `user_uploads_all`;
             if (!forceRefresh && getValue && getValue(cacheKey)) {
                 return getValue(cacheKey);
             }
             const res = await api.get(`/api/users/${userId}/uploads`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (setValue) setValue(cacheKey, res.data);
-            return res.data;
+            const data = res.data.uploads || [];
+            if (setValue) setValue(cacheKey, data);
+            return data;
         },
 
         getUserFiles: async (userId, token, forceRefresh = false) => {
-            const cacheKey = `user_uploads_files_${userId}`;
+            const cacheKey = `user_uploads_files`;
             if (!forceRefresh && getValue && getValue(cacheKey)) {
                 return getValue(cacheKey);
             }
             const res = await api.get(`/api/users/${userId}/uploads/files`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (setValue) setValue(cacheKey, res.data);
-            return res.data;
+            const data = res.data.files || [];
+            if (setValue) setValue(cacheKey, data);
+            return data;
         },
 
         getUserTexts: async (userId, token, forceRefresh = false) => {
-            const cacheKey = `user_uploads_texts_${userId}`;
+            const cacheKey = `user_uploads_texts`;
             if (!forceRefresh && getValue && getValue(cacheKey)) {
                 return getValue(cacheKey);
             }
             const res = await api.get(`/api/users/${userId}/uploads/texts`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (setValue) setValue(cacheKey, res.data);
-            return res.data;
+            const data = res.data.texts || [];
+            if (setValue) setValue(cacheKey, data);
+            return data;
         },
 
         getUserStorage: async (userId, token, forceRefresh = false) => {
-            const cacheKey = `user_storage_stats_${userId}`;
+            const cacheKey = `user_storage_stats`;
             if (!forceRefresh && getValue && getValue(cacheKey)) {
                 return getValue(cacheKey);
             }

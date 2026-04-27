@@ -53,7 +53,7 @@ function Navbar() {
               {user ? (
                 <NavLink
                   to="/dashboard"
-                  className="px-6 py-2 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-lg font-semibold hover:from-red-300 hover:to-red-400 transition-all duration-200 shadow-lg shadow-red-400/20"
+                  className="px-6 py-2 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-lg font-semibold hover:from-red-300 hover:to-red-400 transition-all duration-200 brutalist-btn brutalist-red"
                 >
                   Dashboard
                 </NavLink>
@@ -67,7 +67,7 @@ function Navbar() {
                   </NavLink>
                   <NavLink
                     to="/register"
-                    className="px-6 py-2 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-lg font-semibold hover:from-red-300 hover:to-red-400 transition-all duration-200 shadow-lg shadow-red-400/20"
+                    className="px-6 py-2 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-lg font-semibold hover:from-red-500 hover:to-red-600  transition-all duration-200 brutalist-btn brutalist-red"
                   >
                     Get Started
                   </NavLink>
@@ -98,9 +98,8 @@ function Navbar() {
 
       {/* Mobile Menu (Slide-in) */}
       <div
-        className={`fixed top-0 right-0 w-64 h-full bg-slate-900/90 backdrop-blur-sm transform transition-transform duration-300 ease-in-out z-50 md:hidden ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 w-64 h-full bg-slate-900/90 backdrop-blur-sm transform transition-transform duration-300 ease-in-out z-50 md:hidden ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex flex-col h-full p-4">
           <div className="flex justify-end mb-6">
@@ -133,7 +132,7 @@ function Navbar() {
             {user ? (
               <NavLink
                 to="/dashboard"
-                className="px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-400 to-red-500 text-white hover:from-red-300 hover:to-red-400 transition-all duration-200 text-center"
+                className="px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-400 to-red-500 text-white hover:from-red-300 hover:to-red-400 transition-all duration-200 text-center brutalist-btn brutalist-red"
               >
                 Dashboard
               </NavLink>
@@ -147,7 +146,7 @@ function Navbar() {
                 </NavLink>
                 <NavLink
                   to="/register"
-                  className="px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-400 to-red-500 text-white hover:from-red-300 hover:to-red-400 transition-all duration-200 text-center"
+                  className="px-3 py-2 rounded-md text-base font-medium bg-gradient-to-r from-red-400 to-red-500 text-white hover:from-red-300 hover:to-red-400 transition-all duration-200 text-center brutalist-btn brutalist-red"
                 >
                   Get Started
                 </NavLink>
@@ -157,9 +156,9 @@ function Navbar() {
         </div>
 
 
-        </div>
-      </>
-    );
+      </div>
+    </>
+  );
 }
 
 export default Navbar;

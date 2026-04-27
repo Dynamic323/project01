@@ -18,17 +18,17 @@ export default function FileItem({ file, index, removeFile, handleFilenameEdit, 
       </div>
       <div className="flex gap-2">
         {/* {!isFreePlan && ( */}
-          <button
-            onClick={() => handleFilenameEdit(index)}
-            className="p-2 text-slate-400 hover:text-blue-400 transition-colors"
-            title="Edit filename"
-          >
-            <AiOutlineEdit />
-          </button>
+        <button
+          onClick={() => handleFilenameEdit(index)}
+          className="p-2 text-slate-400 hover:text-blue-400 transition-colors brutalist-btn brutalist-card"
+          title="Edit filename"
+        >
+          <AiOutlineEdit />
+        </button>
         {/* )} */}
         <button
           onClick={() => removeFile(index)}
-          className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+          className="p-2 text-slate-400 hover:text-red-400 transition-colors brutalist-btn brutalist-card"
           title="Remove file"
         >
           <AiOutlineDelete />

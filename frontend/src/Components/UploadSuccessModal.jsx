@@ -8,8 +8,8 @@ export default function UploadSuccessModal({ uploadData, onClose }) {
     alert("Link copied to clipboard!");
   };
 
-//   const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
-     
+  //   const handlePreview = (id) => navigate(`/view/${id}/?type=file`);
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
@@ -33,7 +33,7 @@ export default function UploadSuccessModal({ uploadData, onClose }) {
         {/* Links */}
         <div className="space-y-3">
           {uploadData.map((item, index) => {
-          
+
 
             const link = item?.link || item?.url || "";
             return (
@@ -45,7 +45,7 @@ export default function UploadSuccessModal({ uploadData, onClose }) {
                   {link}
 
 
-                  
+
                 </span>
                 <button
                   onClick={() => copyToClipboard(link)}
@@ -62,7 +62,7 @@ export default function UploadSuccessModal({ uploadData, onClose }) {
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg brutalist-btn brutalist-red"
           >
             Close
           </button>
