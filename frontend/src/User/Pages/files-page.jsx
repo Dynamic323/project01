@@ -70,7 +70,7 @@ export function FilesPage() {
 
     try {
       const token = localStorage.getItem("token");
-      await service.deleteUpload(fileToDelete.id, token);
+      await service.deleteUpload(fileToDelete.id, token, "file");
 
       const currentFiles = getValue("user_uploads_files") || [];
       setValue(
@@ -105,7 +105,10 @@ export function FilesPage() {
         <div className="mb-6 p-4 bg-red-400/10 border border-red-400/20 rounded-lg flex items-center gap-3">
           <AiOutlineExclamationCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
           <p className="text-sm text-slate-300">
-            <span className="text-red-400 font-bold">Free Plan Note:</span> Your files will be automatically deleted <span className="text-white font-medium">4 days</span> after upload. Upgrade to keep them forever!
+            <span className="text-red-400 font-bold">Free Plan Note:</span> Your
+            files will be automatically deleted{" "}
+            <span className="text-white font-medium">4 days</span> after upload.
+            Upgrade to keep them forever!
           </p>
         </div>
       )}

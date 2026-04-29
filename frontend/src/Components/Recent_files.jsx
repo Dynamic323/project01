@@ -32,7 +32,7 @@ function Recent_files() {
 
           console.log(data);
 
-          setValue("user_uploads_all", data.uploads);
+          setValue("user_uploads_all", data);
         } catch (err) {
           handleApiError(err);
         } finally {

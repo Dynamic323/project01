@@ -193,7 +193,7 @@ export function StoragePage() {
               <button className="w-full flex items-center gap-2 p-3 bg-slate-800 text-white rounded-lg hover:bg-slate-700 transition-colors brutalist-btn brutalist-card">
                 <AiOutlineDatabase className="h-4 w-4" />
                 Clean Up Files
-              </button>
+              </button>4
             </div>
           </div>
 

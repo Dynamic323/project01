@@ -21,8 +21,6 @@ export function FileDownload({ url, fileName, className = "" }) {
     //   window.location.href = url;
     // }
 
-    console.log(url);
-
     let downloadUrl = url;
     if (url.includes("res.cloudinary.com")) {
       downloadUrl = url.replace(/\/upload\//, "/upload/fl_attachment/");
