@@ -30,6 +30,16 @@ app.get("/", (req, res) =>
   ),
 );
 
+app.get("/checkenv", (req, res) => {
+  res.json({
+    cloud_name_exists: !!process.env.CLOUDINARY_CLOUD_NAME,
+    api_key_exists: !!process.env.CLOUDINARY_API_KEY,
+    api_secret_exists: !!process.env.CLOUDINARY_API_SECRET,
+    // Only show first few chars if exists (for security)
+    cloud_name_value: process.env.CLOUDINARY_CLOUD_NAME || 'not set'
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
